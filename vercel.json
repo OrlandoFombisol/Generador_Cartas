@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "name": "generador-cartas-arenas",
+  "builds": [
+    { "src": "index.html",   "use": "@vercel/static" },
+    { "src": "styles.css",   "use": "@vercel/static" },
+    { "src": "app.js",       "use": "@vercel/static" },
+    { "src": "assets/**",    "use": "@vercel/static" },
+    { "src": "libs/**",      "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
