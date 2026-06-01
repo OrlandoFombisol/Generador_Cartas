@@ -861,7 +861,7 @@ html.dark .btn-darkmode:hover { background: #2D1F5E; color: var(--c-primary); bo
 .letter-sheet {
   width: 100%;
   max-width: 720px;
-  min-height: 900px;
+  min-height: 0;
   background: #fff;
   border: 1px solid var(--c-border);
   border-radius: var(--radius-md);
@@ -869,6 +869,7 @@ html.dark .btn-darkmode:hover { background: #2D1F5E; color: var(--c-primary); bo
   padding: 3rem 3.5rem;
   position: relative;
   transition: all var(--transition-slow);
+  container-type: inline-size;
   animation: slideUp .4s ease both;
 }
 

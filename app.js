@@ -12,7 +12,8 @@ const APP = {
   selectedIndex: -1,
   fileName: '',
   logoDataUrl: null,
-  logoAspect: 0.28,   /* alto/ancho del logo; se actualiza al cargar imagen real */
+  logoAspect: 0.28,
+  membreteBytes: null,   /* bytes del PDF membrete plantilla */
   currentStep: 1
 };
 
@@ -31,15 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
   bindEvents();
   loadLogo();
+  loadMembrete();
 });
 
 function checkAuth() {
-  const logged = sessionStorage.getItem('ai_logged');
-  if (logged === '1') {
-    showDashboard();
-  } else {
-    showLogin();
-  }
+  /* Login desactivado — acceso directo al sistema */
+  sessionStorage.setItem('ai_logged', '1');
+  showDashboard();
 }
 
 function bindEvents() {
@@ -127,6 +126,18 @@ function tryCanvasLogo(img) {
     APP.logoDataUrl  = c.toDataURL('image/png');
     APP.logoAspect   = img.naturalHeight / (img.naturalWidth || 1);
   } catch (_) { /* sin logo en PDF — se usará texto */ }
+}
+
+/* ── Carga el PDF membrete como plantilla ── */
+async function loadMembrete() {
+  try {
+    const res = await fetch('assets/membrete.pdf');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    APP.membreteBytes = new Uint8Array(await res.arrayBuffer());
+    console.log('Membrete cargado correctamente.');
+  } catch (e) {
+    console.warn('Membrete no disponible, se usará generación estándar:', e.message);
+  }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -517,59 +528,75 @@ function selectClient(client) {
 }
 
 function renderLetterPreview(c) {
-  const logoTag = `<img src="assets/logo.png" alt="Arenas Inmobiliaria" class="letter-header-img" onerror="this.style.display='none'">`;
-
+  /* Previsualización fiel al PDF: membrete como fondo + carta superpuesta.
+     Las proporciones usan % para escalar con el contenedor.
+     Equivalencias: left 11.6% = 25mm, top 11.8% = 33mm (Letter 215.9×279.4mm) */
   const html = `
-    <div>
-      ${logoTag}
-      <div class="letter-divider"></div>
+    <div style="
+      position:relative;
+      width:100%;
+      padding-top:129.4%;
+      overflow:hidden;
+      border-radius:4px;
+      box-shadow:0 2px 12px rgba(0,0,0,.15);
+    ">
+      <!-- Fondo membrete -->
+      <img src="assets/membrete_preview.png"
+        style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;"
+        alt="Membrete">
 
-      <div class="letter-date">${esc(c.fecha_carta)}</div>
+      <!-- Contenido de la carta -->
+      <div style="
+        position:absolute;
+        top:18.3%; left:11.6%; right:9.3%;
+        font-family:Arial,Helvetica,sans-serif;
+        font-size:1.55cqw;
+        color:#000;
+        line-height:1.55;
+      ">
+        <p style="margin:0 0 .6em 0">${esc(c.fecha_carta)}</p>
 
-      <div class="letter-addressee">
-        <div>Señor(a)(es)</div>
-        <div><strong>${esc(c.nombre_cliente)}</strong></div>
-        <div>${esc(c.direccion)}</div>
-        <div>${esc(c.ciudad)}</div>
-      </div>
+        <p style="margin:0">Señor(a)(es)</p>
+        <p style="margin:0;font-weight:700">${esc(c.nombre_cliente)}</p>
+        <p style="margin:0">${esc(c.direccion)}</p>
+        <p style="margin:0 0 .6em 0">${esc(c.ciudad)}</p>
 
-      <div class="letter-subject">Asunto: ${esc(c.asunto)}</div>
+        <p style="margin:0 0 2.5em 0;font-weight:700">Asunto: ${esc(c.asunto)}</p>
 
-      <div class="letter-salutation">Cordial saludo,</div>
+        <p style="margin:0 0 .6em 0">Cordial saludo,</p>
 
-      <div class="letter-body">
-        <p>
+        <p style="margin:0 0 .5em 0;text-align:justify">
           De acuerdo a información recibida por parte de la administración del
           <strong>${esc(c.conjunto)}</strong>, se acordó un incremento de la expensa del
           apartamento que actualmente se encuentra ocupando. Quedando en
-          <span class="letter-val">${esc(c.valor_admon_letras)}</span>
-          (<span class="letter-val">${esc(c.valor_admon_numero)}</span>).
+          <strong>${esc(c.valor_admon_letras)}</strong>
+          (<strong>${esc(c.valor_admon_numero)}</strong>).
         </p>
-        <p>
+
+        <p style="margin:0 0 .7em 0;text-align:justify">
           Por tal motivo, en su factura de arriendo correspondiente al mes de
-          <span class="letter-val">${esc(c.mes_factura)}</span> observará el cobro
-          RETROACTIVOS DE <span class="letter-val">${esc(c.periodo_retroactivo)}</span> por
-          <span class="letter-val">${esc(c.valor_retroactivo)}</span> y el nuevo valor a
+          <strong>${esc(c.mes_factura)}</strong> observará el cobro
+          RETROACTIVOS DE <strong>${esc(c.periodo_retroactivo)}</strong> por
+          <strong>${esc(c.valor_retroactivo)}</strong> y el nuevo valor a
           cancelar, ya que este concepto se le factura a través de
           <strong>${esc(c.empresa_factura)}</strong>.
         </p>
-      </div>
 
-      <div class="letter-payment">
-        <p>PUEDE CANCELAR POR MEDIO DE ESTE LINK:</p>
-        <a href="${esc(c.link_pago)}" target="_blank" rel="noopener">${esc(c.link_pago)}</a>
-      </div>
+        <p style="margin:0 0 .25em 0;font-weight:700;font-size:.9em">PUEDE CANCELAR POR MEDIO DE ESTE LINK:</p>
+        <p style="margin:0 0 4.3em 0;word-break:break-all;font-size:.9em">
+          <a href="${esc(c.link_pago)}" target="_blank" rel="noopener" style="color:#000">${esc(c.link_pago)}</a>
+        </p>
 
-      <div class="letter-closing">
-        Atentamente,
-        <span class="letter-closing-space"></span>
-        <div class="letter-signature">Dpto. de Cartera</div>
+        <p style="margin:0 0 1.8em 0">Atentamente,</p>
+        <p style="margin:0;font-weight:700">Dpto. de Cartera</p>
       </div>
     </div>`;
 
   const sheet = document.getElementById('letterSheet');
   sheet.style.opacity = '0';
   sheet.style.transform = 'translateY(10px)';
+  sheet.style.padding = '0';        /* quitar padding del sheet para que el papel llene el contenedor */
+  sheet.style.background = 'none';
   sheet.innerHTML = html;
   requestAnimationFrame(() => {
     sheet.style.transition = 'opacity .35s ease, transform .35s ease';
@@ -579,7 +606,158 @@ function renderLetterPreview(c) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   GENERACIÓN DE PDF  (jsPDF directo, sin html2canvas)
+   GENERACIÓN DE PDF CON MEMBRETE PLANTILLA  (pdf-lib)
+══════════════════════════════════════════════════════════ */
+
+/* Word-wrap para pdf-lib: devuelve array de líneas */
+function libWrap(text, maxW, font, size) {
+  const words = String(text || '').split(' ');
+  const lines = [];
+  let cur = '';
+  words.forEach(w => {
+    const test = cur ? cur + ' ' + w : w;
+    if (font.widthOfTextAtSize(test, size) <= maxW) {
+      cur = test;
+    } else {
+      if (cur) lines.push(cur);
+      cur = w;
+    }
+  });
+  if (cur) lines.push(cur);
+  return lines.length ? lines : [''];
+}
+
+/* Renderiza párrafo con segmentos de estilo mixto sobre una página pdf-lib.
+   Devuelve la coordenada Y final (bottom-up). */
+function libDrawMixed(page, segs, x, y, maxW, ls, size, fN, fB, cNorm, cRed) {
+  const tokens = [];
+  segs.forEach(s => {
+    s.t.split(' ').forEach((w, i, arr) => {
+      tokens.push({ w: w + (i < arr.length - 1 ? ' ' : ''), b: !!s.b, r: !!s.r });
+    });
+  });
+
+  const lines = [];
+  let line = [], lw = 0;
+  tokens.forEach(tok => {
+    const f = tok.b ? fB : fN;
+    const ww = f.widthOfTextAtSize(tok.w, size);
+    if (lw + ww > maxW && line.length) { lines.push(line); line = [tok]; lw = ww; }
+    else { line.push(tok); lw += ww; }
+  });
+  if (line.length) lines.push(line);
+
+  lines.forEach(ln => {
+    let cx = x;
+    ln.forEach(tok => {
+      const f   = tok.b ? fB : fN;
+      const col = tok.r ? cRed : cNorm;
+      page.drawText(tok.w, { x: cx, y, size, font: f, color: col });
+      cx += f.widthOfTextAtSize(tok.w, size);
+    });
+    y -= ls;
+  });
+  return y;
+}
+
+/* Genera un PDF (Uint8Array) usando el membrete como plantilla */
+async function buildPDFWithTemplate(client) {
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+
+  /* Copia fresca de la plantilla por cada carta */
+  const pdfDoc = await PDFDocument.load(APP.membreteBytes, { ignoreEncryption: true });
+  while (pdfDoc.getPageCount() > 1) pdfDoc.removePage(1);
+
+  const page   = pdfDoc.getPage(0);
+  const { height: PH } = page.getSize();   /* 792 pts (Letter) */
+
+  /* Fuentes (WinAnsiEncoding — soporta á é í ó ú ñ ü) */
+  const fN = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  /* Colores — todo negro */
+  const cMain   = rgb(0, 0, 0);
+  const cRed    = rgb(0, 0, 0);
+  const cSubtle = rgb(0, 0, 0);
+
+  /* ── Medidas ────────────────────────────────────────────────────
+     El membrete (header con logo + datos) ocupa ~30 mm desde arriba.
+     El área útil de la carta va de ~33 mm a ~185 mm desde el tope.
+     Coordenadas en pts: pdf-lib usa origen en la esquina inferior izquierda.
+     Conversión: y_pts = PH - y_mm * MM
+  ───────────────────────────────────────────────────────────────── */
+  const MM = 2.835;          /* 1 mm en puntos */
+  const ML = 25 * MM;       /* margen izquierdo: 25 mm */
+  const CW = 165 * MM;      /* ancho del contenido: 165 mm */
+  const SZ = 11;             /* tamaño de fuente principal (pts) */
+  const LS = 6 * MM;        /* interlineado: 6 mm */
+
+  /* Punto de inicio del contenido — 3 espacios después del encabezado */
+  let y = PH - 51 * MM;
+
+  /* ── Fecha ── */
+  page.drawText(v(client.fecha_carta), { x: ML, y, size: SZ, font: fN, color: cMain });
+  y -= 10 * MM;
+
+  /* ── Destinatario ── */
+  page.drawText('Señor(a)(es)', { x: ML, y, size: SZ, font: fN, color: cMain });
+  y -= LS;
+  page.drawText(v(client.nombre_cliente).toUpperCase(), { x: ML, y, size: SZ, font: fB, color: cMain });
+  y -= LS;
+  libWrap(v(client.direccion), CW, fN, SZ).forEach(l => {
+    page.drawText(l, { x: ML, y, size: SZ, font: fN, color: cMain });
+    y -= LS;
+  });
+  page.drawText(v(client.ciudad), { x: ML, y, size: SZ, font: fN, color: cMain });
+  y -= 9 * MM;
+
+  /* ── Asunto ── */
+  page.drawText('Asunto: ' + v(client.asunto), { x: ML, y, size: SZ, font: fB, color: cMain });
+  y -= 27 * MM;   /* 2 espacios después del asunto */
+
+  /* ── Saludo ── */
+  page.drawText('Cordial saludo,', { x: ML, y, size: SZ, font: fN, color: cMain });
+  y -= 9 * MM;
+
+  /* ── Párrafo 1 ── */
+  y = libDrawMixed(page, [
+    { t: 'De acuerdo a información recibida por parte de la administración del ' },
+    { t: v(client.conjunto), b: 1 },
+    { t: ', se acordó un incremento de la expensa del apartamento que actualmente se encuentra ocupando. Quedando en ' },
+    { t: v(client.valor_admon_letras), r: 1 },
+    { t: ' (' }, { t: v(client.valor_admon_numero), r: 1 }, { t: ').' }
+  ], ML, y, CW, LS, SZ, fN, fB, cMain, cRed) - 7 * MM;
+
+  /* ── Párrafo 2 ── */
+  y = libDrawMixed(page, [
+    { t: 'Por tal motivo, en su factura de arriendo correspondiente al mes de ' },
+    { t: v(client.mes_factura), r: 1 },
+    { t: ' observará el cobro RETROACTIVOS DE ' },
+    { t: v(client.periodo_retroactivo), r: 1 },
+    { t: ' por ' }, { t: v(client.valor_retroactivo), r: 1 },
+    { t: ' y el nuevo valor a cancelar, ya que este concepto se le factura a través de ' },
+    { t: v(client.empresa_factura), b: 1 }, { t: '.' }
+  ], ML, y, CW, LS, SZ, fN, fB, cMain, cRed) - 9 * MM;
+
+  /* ── Link de pago ── */
+  page.drawText('PUEDE CANCELAR POR MEDIO DE ESTE LINK:', { x: ML, y, size: 10, font: fB, color: cSubtle });
+  y -= 6 * MM;
+  libWrap(v(client.link_pago), CW, fN, 10).forEach(l => {
+    page.drawText(l, { x: ML, y, size: 10, font: fN, color: cMain });
+    y -= LS;
+  });
+  y -= 38 * MM;   /* 4 espacios después del link */
+
+  /* ── Cierre ── */
+  page.drawText('Atentamente,', { x: ML, y, size: SZ, font: fN, color: cMain });
+  y -= 18 * MM;
+  page.drawText('Dpto. de Cartera', { x: ML, y, size: SZ, font: fB, color: cMain });
+
+  return pdfDoc.save();
+}
+
+/* ══════════════════════════════════════════════════════════
+   GENERACIÓN DE PDF  (jsPDF directo — fallback sin membrete)
 ══════════════════════════════════════════════════════════ */
 
 function buildPDFDoc(client) {
@@ -770,11 +948,15 @@ async function generatePDFSingle() {
     showToast('Seleccione un cliente para generar el PDF.', 'warning');
     return;
   }
-  showLoading('Generando PDF, por favor espere…');
+  showLoading('Generando PDF con membrete…');
   await delay(50);
   try {
-    const doc = buildPDFDoc(APP.selectedClient);
-    doc.save(pdfName(APP.selectedClient));
+    if (APP.membreteBytes) {
+      const bytes = await buildPDFWithTemplate(APP.selectedClient);
+      saveAs(new Blob([bytes], { type: 'application/pdf' }), pdfName(APP.selectedClient));
+    } else {
+      buildPDFDoc(APP.selectedClient).save(pdfName(APP.selectedClient));
+    }
     setStep(6);
     showToast('PDF generado correctamente.', 'success');
   } catch (err) {
@@ -794,24 +976,35 @@ async function generatePDFConsolidated() {
   await delay(50);
 
   try {
-    const { jsPDF } = window.jspdf;
-    let mergedDoc = null;
+    if (APP.membreteBytes) {
+      const { PDFDocument } = PDFLib;
+      const mergedDoc = await PDFDocument.create();
 
-    for (let i = 0; i < APP.clients.length; i++) {
-      const pageDoc = buildPDFDoc(APP.clients[i]);
-
-      if (i === 0) {
-        mergedDoc = pageDoc;
-      } else {
-        /* Añadir nueva página al doc consolidado */
-        mergedDoc.addPage('letter','portrait');
-        /* Copiar contenido: trick → obtener arraybuffer de pageDoc y merge manual
-           Con jsPDF estándar lo más limpio es reconstruir cada página en el mismo doc */
-        buildPageInDoc(mergedDoc, APP.clients[i]);
+      for (let i = 0; i < APP.clients.length; i++) {
+        document.getElementById('loadingMsg').textContent =
+          `Procesando carta ${i + 1} de ${APP.clients.length}…`;
+        await delay(5);
+        const bytes = await buildPDFWithTemplate(APP.clients[i]);
+        const letterDoc = await PDFDocument.load(bytes);
+        const [pg] = await mergedDoc.copyPages(letterDoc, [0]);
+        mergedDoc.addPage(pg);
       }
+
+      const merged = await mergedDoc.save();
+      saveAs(new Blob([merged], { type: 'application/pdf' }),
+             'Cartas_Aumento_Administracion_Arenas_Inmobiliaria.pdf');
+    } else {
+      /* Fallback sin membrete */
+      const { jsPDF } = window.jspdf;
+      let mergedDoc = null;
+      for (let i = 0; i < APP.clients.length; i++) {
+        const pageDoc = buildPDFDoc(APP.clients[i]);
+        if (i === 0) { mergedDoc = pageDoc; }
+        else { mergedDoc.addPage('letter','portrait'); buildPageInDoc(mergedDoc, APP.clients[i]); }
+      }
+      mergedDoc.save('Cartas_Aumento_Administracion_Arenas_Inmobiliaria.pdf');
     }
 
-    mergedDoc.save('Cartas_Aumento_Administracion_Arenas_Inmobiliaria.pdf');
     setStep(6);
     showToast(`PDF consolidado generado con ${APP.clients.length} carta(s).`, 'success');
   } catch (err) {
@@ -910,10 +1103,14 @@ async function generatePDFZip() {
       const c = APP.clients[i];
       document.getElementById('loadingMsg').textContent =
         `Generando PDF ${i + 1} de ${APP.clients.length}…`;
-      await delay(10); /* micro-yield para no bloquear UI */
+      await delay(10);
 
-      const doc = buildPDFDoc(c);
-      const pdfBytes = doc.output('arraybuffer');
+      let pdfBytes;
+      if (APP.membreteBytes) {
+        pdfBytes = await buildPDFWithTemplate(c);
+      } else {
+        pdfBytes = buildPDFDoc(c).output('arraybuffer');
+      }
       folder.file(pdfName(c), pdfBytes);
     }
 
