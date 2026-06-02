@@ -32,12 +32,49 @@ document.addEventListener('DOMContentLoaded', () => {
   bindEvents();
   loadLogo();
   loadMembrete();
-  /* Inicia la animación espacial y luego checkAuth */
-  if (window.SpaceAnim) {
-    SpaceAnim.init();
-  }
+  removeWhiteBgFromHero();
+  if (window.SpaceAnim) SpaceAnim.init();
   checkAuth();
 });
+
+/* ── Elimina el fondo blanco del icono usando canvas ── */
+function removeWhiteBgFromHero() {
+  const img = document.querySelector('.hero-logo');
+  if (!img) return;
+
+  function process() {
+    try {
+      const cv  = document.createElement('canvas');
+      cv.width  = img.naturalWidth;
+      cv.height = img.naturalHeight;
+      const ctx = cv.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      const id = ctx.getImageData(0, 0, cv.width, cv.height);
+      const d  = id.data;
+
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i+1], b = d[i+2];
+        const brightness  = (r + g + b) / 3;
+        const saturation  = Math.max(r, g, b) - Math.min(r, g, b);
+        /* Píxeles blancos/grises claros con baja saturación → transparentes */
+        if (brightness > 215 && saturation < 35) {
+          /* Difuminado suave en el borde */
+          const fade   = (brightness - 215) / 40;
+          d[i + 3] = Math.max(0, Math.round(d[i+3] * (1 - fade)));
+        }
+      }
+
+      ctx.putImageData(id, 0, 0);
+      img.src = cv.toDataURL('image/png');
+    } catch (e) { /* Si falla (CORS, etc.) deja la imagen original */ }
+  }
+
+  if (img.complete && img.naturalWidth > 0) {
+    process();
+  } else {
+    img.addEventListener('load', process, { once: true });
+  }
+}
 
 function checkAuth() {
   /* Muestra la landing con la animación espacial */
