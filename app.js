@@ -29,19 +29,25 @@ const REQUIRED_COLS = [
 ══════════════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
-  checkAuth();
   bindEvents();
   loadLogo();
   loadMembrete();
+  /* Inicia la animación espacial y luego checkAuth */
+  if (window.SpaceAnim) {
+    SpaceAnim.init();
+  }
+  checkAuth();
 });
 
 function checkAuth() {
-  showLanding();
+  /* Muestra la landing con la animación espacial */
+  document.getElementById('landingSection').style.display = 'block';
+  document.getElementById('dashboardSection').style.display = 'none';
 }
 
 function bindEvents() {
-  /* Landing */
-  document.getElementById('btnEnterSystem').addEventListener('click', enterSystem);
+  /* Landing · Hero card click */
+  document.getElementById('heroCard').addEventListener('click', enterSystem);
 
   /* Login */
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
@@ -179,23 +185,31 @@ function animateLoginSuccess() {
 }
 
 function showLanding() {
-  const landing = document.getElementById('landingSection');
-  const dash    = document.getElementById('dashboardSection');
-  dash.style.display = 'none';
-  landing.style.display = 'flex';
-  landing.classList.remove('section-exit');
-  landing.classList.add('section-enter');
-  setTimeout(() => landing.classList.remove('section-enter'), 600);
+  const landing = document.getElementById('dashboardSection');
+  if (landing) landing.style.display = 'none';
+  const ls = document.getElementById('landingSection');
+  if (ls) ls.style.display = 'block';
+  /* Reinicia la animación espacial */
+  if (window.SpaceAnim) {
+    SpaceAnim.stop();
+    SpaceAnim.init();
+  }
 }
 
 function enterSystem() {
-  const landing = document.getElementById('landingSection');
-  landing.classList.add('section-exit');
+  /* Flash portal */
+  const flash = document.getElementById('warpFlash');
+  if (flash) {
+    flash.classList.add('active');
+    setTimeout(() => flash.classList.remove('active'), 350);
+  }
+  /* Detiene la animación espacial */
+  if (window.SpaceAnim) SpaceAnim.stop();
   setTimeout(() => {
-    landing.style.display = 'none';
+    document.getElementById('landingSection').style.display = 'none';
     sessionStorage.setItem('ai_logged', '1');
     showDashboard();
-  }, 380);
+  }, 280);
 }
 
 function showLogin() {

@@ -3,6 +3,335 @@
    UI/UX Corporativo · Paleta Navy & Corporate Blue
 ══════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════
+   SPACE ANIMATION · Órbita de cartas
+══════════════════════════════════════════════════════════ */
+
+/* Canvas de fondo */
+.space-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  display: block;
+}
+
+/* Flash de transición tipo portal */
+.warp-flash {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(100,180,255,0.85) 0%, rgba(30,77,160,0.6) 60%, transparent 100%);
+  z-index: 9998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.warp-flash.active { opacity: 1; }
+
+/* Escenario orbital */
+.orbit-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  perspective: 900px;
+}
+
+/* Tarjetas de carta en órbita */
+.orbit-card {
+  position: absolute;
+  width: 78px;
+  height: 100px;
+  border-radius: 8px 8px 6px 6px;
+  background: rgba(8, 20, 55, 0.88);
+  border: 1px solid rgba(43, 109, 232, 0.45);
+  box-shadow: 0 4px 20px rgba(43,109,232,0.2), 0 0 35px rgba(43,109,232,0.08);
+  backdrop-filter: blur(6px);
+  overflow: hidden;
+  pointer-events: none;
+  transform-style: preserve-3d;
+  will-change: transform, left, top, opacity;
+}
+
+.oc-head {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 4px;
+}
+.oc-head::before, .oc-head::after {
+  content: '';
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.oc-head::before { width: 6px; height: 6px; background: rgba(255,255,255,0.5); }
+.oc-head::after  { width: 5px; height: 5px; background: rgba(255,255,255,0.3); }
+
+.oc-head-blue { background: linear-gradient(90deg, rgba(43,109,232,0.85), rgba(30,70,180,0.85)); }
+.oc-head-teal { background: linear-gradient(90deg, rgba(8,145,178,0.85), rgba(6,110,145,0.85)); }
+.oc-head-gold { background: linear-gradient(90deg, rgba(200,161,42,0.85), rgba(160,120,25,0.85)); }
+
+.oc-body {
+  padding: 7px 8px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.oc-line {
+  height: 3px;
+  background: rgba(100, 160, 255, 0.38);
+  border-radius: 2px;
+  width: 100%;
+}
+.oc-line.oc-s { width: 55%; }
+.oc-line.oc-m { width: 72%; }
+
+/* ── Tarjeta héroe central ── */
+.hero-card {
+  position: fixed;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, rgba(43,109,232,0.28) 0%, rgba(6,15,45,0.96) 100%);
+  border: 2px solid rgba(43,109,232,0.65);
+  box-shadow:
+    0 0 0 1px rgba(43,109,232,0.2),
+    0 0 50px rgba(43,109,232,0.5),
+    0 0 100px rgba(43,109,232,0.22),
+    inset 0 0 40px rgba(43,109,232,0.08);
+  z-index: 50;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  transition: box-shadow 0.35s ease;
+}
+
+/* Anillos pulsantes */
+.hero-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(43,109,232,0.35);
+  width: 120%;
+  height: 120%;
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
+}
+
+/* Se activan solo cuando hero está listo */
+.hero-ready .hero-ring:nth-child(1) { animation: heroRing 3s ease-out 0.0s infinite; }
+.hero-ready .hero-ring:nth-child(2) { animation: heroRing 3s ease-out 1.0s infinite; }
+.hero-ready .hero-ring:nth-child(3) { animation: heroRing 3s ease-out 2.0s infinite; }
+
+@keyframes heroRing {
+  0%   { transform: scale(1);   opacity: 0.65; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.hero-logo {
+  width: 140px;
+  max-height: 75px;
+  object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(100,180,255,0.9));
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-hint {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: rgba(150,205,255,0.75);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.5s ease 0.3s, transform 0.5s ease 0.3s;
+}
+.hero-ready .hero-hint { opacity: 1; transform: translateY(0); }
+
+.hero-card.hero-ready:hover {
+  box-shadow:
+    0 0 0 1px rgba(43,109,232,0.35),
+    0 0 70px rgba(43,109,232,0.7),
+    0 0 140px rgba(43,109,232,0.35),
+    inset 0 0 50px rgba(43,109,232,0.12);
+}
+.hero-card.hero-ready:active { filter: brightness(1.3); }
+
+/* ── Contenido textual (aparece después) ── */
+.l-content {
+  position: absolute;
+  bottom: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 30;
+  width: 100%;
+  max-width: 640px;
+  padding: 0 1.5rem;
+  pointer-events: none;
+  /* Estado inicial oculto */
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateX(-50%) translateY(18px);
+  transition: opacity 0.85s cubic-bezier(0.16,1,0.3,1),
+              filter 0.85s cubic-bezier(0.16,1,0.3,1),
+              transform 0.85s cubic-bezier(0.16,1,0.3,1);
+}
+
+.l-content.l-content-show {
+  opacity: 1;
+  filter: blur(0px);
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+
+.l-eyebrow-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(180,210,255,0.6);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.l-title {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+}
+.l-title em {
+  font-style: normal;
+  background: linear-gradient(135deg, #60A5FA 0%, #93C5FD 50%, #C8A12A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.l-pills {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.l-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(190,220,255,0.85);
+}
+.l-pill svg { color: rgba(100,200,255,0.8); flex-shrink: 0; }
+
+/* ── Barra stats (heredada) ── */
+.l-stats {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background: rgba(8,15,35,0.75);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(43,109,232,0.18);
+  padding: 0.9rem 2rem;
+  flex-wrap: wrap;
+}
+
+.l-stat {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px; padding: 0.3rem 1.8rem;
+}
+.l-stat-val {
+  font-size: 1rem; font-weight: 800; color: #fff;
+  letter-spacing: -0.01em; line-height: 1;
+}
+.l-stat-lbl { font-size: 0.7rem; color: rgba(180,205,255,0.5); white-space: nowrap; }
+.l-stat-sep { width: 1px; height: 28px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
+
+/* ── Nav flotante ── */
+.l-nav {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.3rem 2rem;
+}
+
+.l-nav-brand { display: flex; align-items: center; }
+.l-nav-logo-wrap {
+  background: rgba(255,255,255,0.09);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 12px;
+  padding: 0.5rem 0.95rem;
+  display: inline-flex; align-items: center;
+}
+.l-nav-logo { height: 34px; max-width: 170px; object-fit: contain; filter: brightness(0) invert(1); }
+
+.l-nav-pill {
+  display: flex; align-items: center; gap: 0.45rem;
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  padding: 0.32rem 0.85rem;
+  font-size: 0.76rem; font-weight: 500;
+  color: rgba(255,255,255,0.65);
+}
+.l-nav-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #4ADE80; box-shadow: 0 0 8px #4ADE80;
+  animation: dotPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%,100% { opacity: 1; box-shadow: 0 0 6px #4ADE80; }
+  50%      { opacity: 0.5; box-shadow: 0 0 14px #4ADE80; }
+}
+
+/* ─────────────────────── Responsive space ── */
+@media (max-width: 640px) {
+  .hero-card { width: 170px; height: 170px; }
+  .hero-logo { width: 110px; max-height: 60px; }
+  .l-title { font-size: 1.8rem; }
+  .l-content { bottom: 65px; }
+  .l-nav { padding: 1rem; }
+  .l-nav-pill { display: none; }
+  .l-stats { padding: 0.8rem 1rem; }
+  .l-stat { padding: 0.3rem 0.9rem; }
+}
+
 /* ── Variables modo claro ── */
 :root {
   /* Corporate Blue Palette */
@@ -122,16 +451,16 @@ p { line-height: 1.65; }
 
 
 /* ══════════════════════════════════════════════════════════
-   LANDING SECTION
+   LANDING SECTION (base shell — animation fills it)
 ══════════════════════════════════════════════════════════ */
 
 .landing-section {
   position: relative;
-  min-height: 100vh;
-  background: linear-gradient(145deg, #060E1E 0%, #0D1F3C 45%, #142552 100%);
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  background: #020507;
   overflow: hidden;
+  display: block;
 }
 
 /* ── Background layers ── */

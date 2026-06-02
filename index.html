@@ -17,19 +17,87 @@
 </head>
 <body>
 
-<!-- ═══════════════════ LANDING ═══════════════════ -->
+<!-- ═══════════════════ LANDING · ESPACIO ═══════════════════ -->
 <div id="landingSection" class="landing-section">
 
-  <!-- Background layers -->
-  <div class="l-bg">
-    <div class="l-aurora l-aurora-1"></div>
-    <div class="l-aurora l-aurora-2"></div>
-    <div class="l-aurora l-aurora-3"></div>
-    <div class="l-grid"></div>
-    <div class="l-vignette"></div>
-  </div>
+  <!-- Canvas: espacio, estrellas, rastros de cometa -->
+  <canvas id="spaceCanvas" class="space-canvas"></canvas>
 
-  <!-- Top nav -->
+  <!-- Flash de transición (portal de entrada) -->
+  <div id="warpFlash" class="warp-flash"></div>
+
+  <!-- Cartas que orbitan como asteroides -->
+  <div id="orbitStage" class="orbit-stage">
+
+    <div class="orbit-card" id="oc0">
+      <div class="oc-head oc-head-blue"></div>
+      <div class="oc-body">
+        <div class="oc-line"></div>
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line oc-s"></div>
+      </div>
+    </div>
+
+    <div class="orbit-card" id="oc1">
+      <div class="oc-head oc-head-teal"></div>
+      <div class="oc-body">
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+      </div>
+    </div>
+
+    <div class="orbit-card" id="oc2">
+      <div class="oc-head oc-head-gold"></div>
+      <div class="oc-body">
+        <div class="oc-line"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line oc-s"></div>
+      </div>
+    </div>
+
+    <div class="orbit-card" id="oc3">
+      <div class="oc-head oc-head-blue"></div>
+      <div class="oc-body">
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-s"></div>
+      </div>
+    </div>
+
+    <div class="orbit-card" id="oc4">
+      <div class="oc-head oc-head-teal"></div>
+      <div class="oc-body">
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+      </div>
+    </div>
+
+    <div class="orbit-card" id="oc5">
+      <div class="oc-head oc-head-gold"></div>
+      <div class="oc-body">
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line"></div>
+      </div>
+    </div>
+
+  </div><!-- /orbitStage -->
+
+  <!-- Nav flotante (arriba) -->
   <header class="l-nav">
     <div class="l-nav-brand">
       <div class="l-nav-logo-wrap">
@@ -42,131 +110,58 @@
     </div>
   </header>
 
-  <!-- Hero -->
-  <main class="l-hero">
-    <div class="l-hero-inner">
-
-      <!-- Eyebrow badge -->
-      <div class="l-eyebrow l-anim" style="--d:0.05s">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-        </svg>
-        <span>Plataforma Documental · Dpto. de Cartera</span>
-      </div>
-
-      <!-- Title -->
-      <h1 class="l-title l-anim" style="--d:0.15s">
-        Generador<br>
-        de <span class="l-title-accent">Cartas</span>
-      </h1>
-
-      <!-- Subtitle -->
-      <p class="l-subtitle l-anim" style="--d:0.25s">
-        Automatización inteligente de comunicaciones documentales<br class="l-br">
-        para la gestión eficiente de cartera inmobiliaria
-      </p>
-
-      <!-- Feature cards -->
-      <div class="l-features l-anim" style="--d:0.38s">
-        <div class="l-feat">
-          <div class="l-feat-icon l-feat-blue">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </div>
-          <div class="l-feat-body">
-            <strong>PDF Automático</strong>
-            <span>Con membrete integrado</span>
-          </div>
-        </div>
-
-        <div class="l-feat">
-          <div class="l-feat-icon l-feat-teal">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-              <line x1="3" y1="9" x2="21" y2="9"/>
-              <line x1="3" y1="15" x2="21" y2="15"/>
-              <line x1="9" y1="3" x2="9" y2="21"/>
-              <line x1="15" y1="3" x2="15" y2="21"/>
-            </svg>
-          </div>
-          <div class="l-feat-body">
-            <strong>Excel Integrado</strong>
-            <span>Carga masiva de datos</span>
-          </div>
-        </div>
-
-        <div class="l-feat">
-          <div class="l-feat-icon l-feat-gold">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-          </div>
-          <div class="l-feat-body">
-            <strong>100% Digital</strong>
-            <span>Sin papel ni impresoras</span>
-          </div>
-        </div>
-
-        <div class="l-feat">
-          <div class="l-feat-icon l-feat-violet">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            </svg>
-          </div>
-          <div class="l-feat-body">
-            <strong>Descarga en ZIP</strong>
-            <span>Múltiples cartas a la vez</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- CTA -->
-      <div class="l-cta l-anim" style="--d:0.52s">
-        <button class="btn-enter" id="btnEnterSystem">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-            <polyline points="10 17 15 12 10 7"/>
-            <line x1="15" y1="12" x2="3" y2="12"/>
-          </svg>
-          <span>Ingresar al sistema</span>
-          <svg class="btn-enter-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="5" y1="12" x2="19" y2="12"/>
-            <polyline points="12 5 19 12 12 19"/>
-          </svg>
-          <span class="btn-enter-shimmer"></span>
-        </button>
-        <p class="l-cta-note">Acceso directo · Sistema interno Arenas Inmobiliaria</p>
-      </div>
-
+  <!-- Tarjeta héroe central (aparece con animación 3D) -->
+  <div id="heroCard" class="hero-card" style="display:none; opacity:0">
+    <!-- Anillos pulsantes -->
+    <div class="hero-ring"></div>
+    <div class="hero-ring"></div>
+    <div class="hero-ring"></div>
+    <!-- Logo -->
+    <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="hero-logo">
+    <!-- Hint de clic (aparece después) -->
+    <div class="hero-hint">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+      </svg>
+      <span>Ingresar al sistema</span>
     </div>
-  </main>
+  </div>
 
-  <!-- Bottom stats bar -->
-  <footer class="l-stats l-anim" style="--d:0.65s">
-    <div class="l-stat">
-      <span class="l-stat-val">PDF</span>
-      <span class="l-stat-lbl">Generación automática</span>
+  <!-- Contenido textual (aparece después de la animación) -->
+  <div id="landingContent" class="l-content">
+    <p class="l-eyebrow-text">Plataforma Documental · Arenas Inmobiliaria</p>
+    <h1 class="l-title">Generador de <em>Cartas</em></h1>
+    <div class="l-pills">
+      <span class="l-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        PDF Automático
+      </span>
+      <span class="l-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Excel Integrado
+      </span>
+      <span class="l-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        100% Digital
+      </span>
+      <span class="l-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Descarga ZIP
+      </span>
     </div>
+  </div>
+
+  <!-- Barra inferior de stats -->
+  <footer class="l-stats">
+    <div class="l-stat"><span class="l-stat-val">PDF</span><span class="l-stat-lbl">Generación automática</span></div>
     <div class="l-stat-sep"></div>
-    <div class="l-stat">
-      <span class="l-stat-val">Excel</span>
-      <span class="l-stat-lbl">Formato base incluido</span>
-    </div>
+    <div class="l-stat"><span class="l-stat-val">Excel</span><span class="l-stat-lbl">Formato base incluido</span></div>
     <div class="l-stat-sep"></div>
-    <div class="l-stat">
-      <span class="l-stat-val">ZIP</span>
-      <span class="l-stat-lbl">Descarga masiva</span>
-    </div>
+    <div class="l-stat"><span class="l-stat-val">ZIP</span><span class="l-stat-lbl">Descarga masiva</span></div>
     <div class="l-stat-sep"></div>
-    <div class="l-stat">
-      <span class="l-stat-val">100%</span>
-      <span class="l-stat-lbl">Digital sin papel</span>
-    </div>
+    <div class="l-stat"><span class="l-stat-val">100%</span><span class="l-stat-lbl">Digital sin papel</span></div>
   </footer>
 
 </div><!-- /landingSection -->
@@ -572,6 +567,7 @@
 <!-- Toast -->
 <div id="toastContainer" class="toast-container"></div>
 
+<script src="space-animation.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
