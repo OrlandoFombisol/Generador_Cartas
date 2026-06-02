@@ -17,18 +17,18 @@
   display: block;
 }
 
-/* Velo de transición cinematográfico (fundido oscuro suave) */
+/* Velo de transición — túnel de luz suave */
 .warp-flash {
   position: fixed;
   inset: 0;
   background: radial-gradient(ellipse at center,
-    rgba(8,20,55,0.92) 0%,
-    rgba(3,8,20,0.97) 55%,
+    rgba(20, 55, 140, 0.5) 0%,
+    rgba(6, 14, 40, 0.94) 50%,
     #020507 100%);
   z-index: 9998;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .warp-flash.active { opacity: 1; }
 
@@ -598,23 +598,6 @@ p { line-height: 1.65; }
 }
 
 .l-nav-brand { display: flex; align-items: center; gap: 0.9rem; }
-
-.l-nav-logo-wrap {
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: var(--radius-md);
-  padding: 0.55rem 1rem;
-  display: inline-flex;
-  align-items: center;
-}
-
-.l-nav-logo {
-  height: 36px;
-  max-width: 180px;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
-}
 
 .l-nav-pill {
   display: flex;
@@ -1247,6 +1230,25 @@ html.dark .dashboard-section {
 }
 
 html.dark .dash-banner { border-color: rgba(43,109,232,0.3); }
+
+/* ── Hover del banner ── */
+.dash-banner {
+  transition:
+    box-shadow 0.5s ease,
+    border-color 0.5s ease,
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dash-banner:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 60px rgba(43,109,232,0.38), 0 6px 24px rgba(0,20,60,0.3);
+  border-color: rgba(43,109,232,0.55);
+}
+.dash-banner:hover .dash-banner-city {
+  animation-play-state: paused;
+}
+.dash-banner:hover .dash-banner-logo-img {
+  filter: brightness(0) invert(1) drop-shadow(0 4px 28px rgba(100,180,255,0.8));
+}
 
 /* ── Banner responsive ── */
 @media (max-width: 860px) {

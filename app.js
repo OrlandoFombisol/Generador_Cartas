@@ -32,48 +32,45 @@ document.addEventListener('DOMContentLoaded', () => {
   bindEvents();
   loadLogo();
   loadMembrete();
-  removeWhiteBgFromHero();
+  /* Eliminar fondo blanco de todos los logos que van sobre fondos oscuros */
+  removeWhiteBg('.hero-logo');
+  removeWhiteBg('.l-nav-logo');
+  removeWhiteBg('.dash-banner-logo-img');
   if (window.SpaceAnim) SpaceAnim.init();
   checkAuth();
 });
 
-/* ── Elimina el fondo blanco del icono usando canvas ── */
-function removeWhiteBgFromHero() {
-  const img = document.querySelector('.hero-logo');
+/* ── Elimina el fondo blanco de cualquier imagen via canvas ── */
+function removeWhiteBg(selector) {
+  const img = document.querySelector(selector);
   if (!img) return;
 
   function process() {
+    if (!img.naturalWidth) return;
     try {
       const cv  = document.createElement('canvas');
       cv.width  = img.naturalWidth;
       cv.height = img.naturalHeight;
       const ctx = cv.getContext('2d');
       ctx.drawImage(img, 0, 0);
-      const id = ctx.getImageData(0, 0, cv.width, cv.height);
-      const d  = id.data;
-
+      const id  = ctx.getImageData(0, 0, cv.width, cv.height);
+      const d   = id.data;
       for (let i = 0; i < d.length; i += 4) {
         const r = d[i], g = d[i+1], b = d[i+2];
-        const brightness  = (r + g + b) / 3;
-        const saturation  = Math.max(r, g, b) - Math.min(r, g, b);
-        /* Píxeles blancos/grises claros con baja saturación → transparentes */
-        if (brightness > 215 && saturation < 35) {
-          /* Difuminado suave en el borde */
-          const fade   = (brightness - 215) / 40;
-          d[i + 3] = Math.max(0, Math.round(d[i+3] * (1 - fade)));
+        const lum = (r + g + b) / 3;
+        const sat = Math.max(r, g, b) - Math.min(r, g, b);
+        if (lum > 215 && sat < 35) {
+          const fade = (lum - 215) / 40;
+          d[i + 3] = Math.max(0, Math.round(d[i + 3] * (1 - fade)));
         }
       }
-
       ctx.putImageData(id, 0, 0);
       img.src = cv.toDataURL('image/png');
-    } catch (e) { /* Si falla (CORS, etc.) deja la imagen original */ }
+    } catch (e) { /* falla silenciosa — imagen original sin cambios */ }
   }
 
-  if (img.complete && img.naturalWidth > 0) {
-    process();
-  } else {
-    img.addEventListener('load', process, { once: true });
-  }
+  if (img.complete && img.naturalWidth > 0) process();
+  else img.addEventListener('load', process, { once: true });
 }
 
 function checkAuth() {
@@ -237,26 +234,28 @@ function enterSystem() {
   const hero  = document.getElementById('heroCard');
   const flash = document.getElementById('warpFlash');
 
-  /* 1. El héroe destella levemente */
+  /* Fase 1 (0–400ms): el héroe se ilumina y expande */
   if (hero) {
-    hero.style.transition = 'filter 0.25s ease, box-shadow 0.25s ease';
-    hero.style.filter     = 'brightness(1.35)';
+    hero.style.transition = 'filter 0.45s ease, transform 0.45s cubic-bezier(0.34,1.56,0.64,1)';
+    hero.style.filter     = 'brightness(1.8) saturate(1.5)';
+    hero.style.transform  = 'translate(-50%,-50%) scale(1.15)';
   }
 
-  /* 2. Velo oscuro se despliega suavemente (600 ms) */
-  if (flash) flash.classList.add('active');
+  /* Fase 2 (400ms): velo oscuro se despliega lentamente */
+  setTimeout(() => {
+    if (flash) flash.classList.add('active');
+  }, 400);
 
-  /* 3. Detiene la animación y muestra el dashboard (750 ms) */
+  /* Fase 3 (1500ms): entra al sistema */
   setTimeout(() => {
     if (window.SpaceAnim) SpaceAnim.stop();
     document.getElementById('landingSection').style.display = 'none';
-    if (hero) { hero.style.filter = ''; hero.style.transition = ''; }
+    if (hero) { hero.style.filter = ''; hero.style.transition = ''; hero.style.transform = ''; }
     sessionStorage.setItem('ai_logged', '1');
     showDashboard();
-
-    /* 4. El velo se retira suavemente (500 ms más) */
-    setTimeout(() => { if (flash) flash.classList.remove('active'); }, 80);
-  }, 750);
+    /* Fase 4: velo se retira revelando el dashboard */
+    setTimeout(() => { if (flash) flash.classList.remove('active'); }, 120);
+  }, 1500);
 }
 
 function showLogin() {
