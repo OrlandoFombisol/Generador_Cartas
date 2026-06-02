@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Generador de Cartas · Arenas Inmobiliaria</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="libs/xlsx.full.min.js"></script>
   <script src="libs/jspdf.umd.min.js"></script>
@@ -14,58 +17,165 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════ LOGIN ═══════════════════════════ -->
-<div id="loginSection" class="login-section">
+<!-- ═══════════════════ LANDING ═══════════════════ -->
+<div id="landingSection" class="landing-section">
 
-  <!-- Panel izquierdo decorativo -->
+  <!-- Background layers -->
+  <div class="l-bg">
+    <div class="l-aurora l-aurora-1"></div>
+    <div class="l-aurora l-aurora-2"></div>
+    <div class="l-aurora l-aurora-3"></div>
+    <div class="l-grid"></div>
+    <div class="l-vignette"></div>
+  </div>
+
+  <!-- Top nav -->
+  <header class="l-nav">
+    <div class="l-nav-brand">
+      <div class="l-nav-logo-wrap">
+        <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="l-nav-logo">
+      </div>
+    </div>
+    <div class="l-nav-pill">
+      <span class="l-nav-dot"></span>
+      Sistema activo
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <main class="l-hero">
+    <div class="l-hero-inner">
+
+      <!-- Eyebrow badge -->
+      <div class="l-eyebrow l-anim" style="--d:0.05s">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <span>Plataforma Documental · Dpto. de Cartera</span>
+      </div>
+
+      <!-- Title -->
+      <h1 class="l-title l-anim" style="--d:0.15s">
+        Generador<br>
+        de <span class="l-title-accent">Cartas</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="l-subtitle l-anim" style="--d:0.25s">
+        Automatización inteligente de comunicaciones documentales<br class="l-br">
+        para la gestión eficiente de cartera inmobiliaria
+      </p>
+
+      <!-- Feature cards -->
+      <div class="l-features l-anim" style="--d:0.38s">
+        <div class="l-feat">
+          <div class="l-feat-icon l-feat-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div class="l-feat-body">
+            <strong>PDF Automático</strong>
+            <span>Con membrete integrado</span>
+          </div>
+        </div>
+
+        <div class="l-feat">
+          <div class="l-feat-icon l-feat-teal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <line x1="3" y1="9" x2="21" y2="9"/>
+              <line x1="3" y1="15" x2="21" y2="15"/>
+              <line x1="9" y1="3" x2="9" y2="21"/>
+              <line x1="15" y1="3" x2="15" y2="21"/>
+            </svg>
+          </div>
+          <div class="l-feat-body">
+            <strong>Excel Integrado</strong>
+            <span>Carga masiva de datos</span>
+          </div>
+        </div>
+
+        <div class="l-feat">
+          <div class="l-feat-icon l-feat-gold">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="l-feat-body">
+            <strong>100% Digital</strong>
+            <span>Sin papel ni impresoras</span>
+          </div>
+        </div>
+
+        <div class="l-feat">
+          <div class="l-feat-icon l-feat-violet">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+          </div>
+          <div class="l-feat-body">
+            <strong>Descarga en ZIP</strong>
+            <span>Múltiples cartas a la vez</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="l-cta l-anim" style="--d:0.52s">
+        <button class="btn-enter" id="btnEnterSystem">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+            <polyline points="10 17 15 12 10 7"/>
+            <line x1="15" y1="12" x2="3" y2="12"/>
+          </svg>
+          <span>Ingresar al sistema</span>
+          <svg class="btn-enter-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+          <span class="btn-enter-shimmer"></span>
+        </button>
+        <p class="l-cta-note">Acceso directo · Sistema interno Arenas Inmobiliaria</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Bottom stats bar -->
+  <footer class="l-stats l-anim" style="--d:0.65s">
+    <div class="l-stat">
+      <span class="l-stat-val">PDF</span>
+      <span class="l-stat-lbl">Generación automática</span>
+    </div>
+    <div class="l-stat-sep"></div>
+    <div class="l-stat">
+      <span class="l-stat-val">Excel</span>
+      <span class="l-stat-lbl">Formato base incluido</span>
+    </div>
+    <div class="l-stat-sep"></div>
+    <div class="l-stat">
+      <span class="l-stat-val">ZIP</span>
+      <span class="l-stat-lbl">Descarga masiva</span>
+    </div>
+    <div class="l-stat-sep"></div>
+    <div class="l-stat">
+      <span class="l-stat-val">100%</span>
+      <span class="l-stat-lbl">Digital sin papel</span>
+    </div>
+  </footer>
+
+</div><!-- /landingSection -->
+
+
+<!-- ═══════════════════ LOGIN (oculto, requerido por app.js) ═══════════════════ -->
+<div id="loginSection" class="login-section" style="display:none;">
   <div class="login-left">
     <div class="login-left-overlay"></div>
-    <svg class="city-svg" viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-      <!-- Estrellas/partículas -->
-      <circle cx="100" cy="60" r="1.5" fill="rgba(255,255,255,0.5)"/>
-      <circle cx="250" cy="40" r="1" fill="rgba(255,255,255,0.4)"/>
-      <circle cx="400" cy="25" r="2" fill="rgba(255,255,255,0.6)"/>
-      <circle cx="560" cy="50" r="1.5" fill="rgba(255,255,255,0.4)"/>
-      <circle cx="700" cy="30" r="1" fill="rgba(255,255,255,0.5)"/>
-      <circle cx="750" cy="80" r="1.5" fill="rgba(255,255,255,0.3)"/>
-      <circle cx="50" cy="100" r="1" fill="rgba(255,255,255,0.4)"/>
-      <circle cx="650" cy="90" r="2" fill="rgba(255,255,255,0.4)"/>
-      <!-- Edificios fondo lejano -->
-      <rect x="0" y="260" width="45" height="240" fill="rgba(255,255,255,0.06)" rx="2"/>
-      <rect x="48" y="220" width="35" height="280" fill="rgba(255,255,255,0.08)" rx="2"/>
-      <rect x="86" y="240" width="40" height="260" fill="rgba(255,255,255,0.05)" rx="2"/>
-      <rect x="130" y="180" width="50" height="320" fill="rgba(255,255,255,0.07)" rx="2"/>
-      <rect x="184" y="200" width="38" height="300" fill="rgba(255,255,255,0.05)" rx="2"/>
-      <rect x="226" y="250" width="30" height="250" fill="rgba(255,255,255,0.06)" rx="2"/>
-      <rect x="620" y="230" width="40" height="270" fill="rgba(255,255,255,0.06)" rx="2"/>
-      <rect x="664" y="190" width="55" height="310" fill="rgba(255,255,255,0.08)" rx="2"/>
-      <rect x="723" y="210" width="38" height="290" fill="rgba(255,255,255,0.05)" rx="2"/>
-      <rect x="764" y="250" width="36" height="250" fill="rgba(255,255,255,0.06)" rx="2"/>
-      <!-- Edificios principales centro -->
-      <rect x="300" y="150" width="55" height="350" fill="rgba(255,255,255,0.1)" rx="3"/>
-      <rect x="358" y="100" width="70" height="400" fill="rgba(255,255,255,0.13)" rx="3"/>
-      <rect x="432" y="130" width="60" height="370" fill="rgba(255,255,255,0.1)" rx="3"/>
-      <rect x="495" y="160" width="50" height="340" fill="rgba(255,255,255,0.08)" rx="3"/>
-      <!-- Ventanas edificio central -->
-      <rect x="368" y="115" width="10" height="8" fill="rgba(255,255,255,0.3)" rx="1"/>
-      <rect x="383" y="115" width="10" height="8" fill="rgba(255,255,255,0.3)" rx="1"/>
-      <rect x="398" y="115" width="10" height="8" fill="rgba(255,255,255,0.2)" rx="1"/>
-      <rect x="368" y="130" width="10" height="8" fill="rgba(255,255,255,0.25)" rx="1"/>
-      <rect x="383" y="130" width="10" height="8" fill="rgba(255,255,255,0.35)" rx="1"/>
-      <rect x="398" y="130" width="10" height="8" fill="rgba(255,255,255,0.25)" rx="1"/>
-      <rect x="368" y="145" width="10" height="8" fill="rgba(255,255,255,0.2)" rx="1"/>
-      <rect x="383" y="145" width="10" height="8" fill="rgba(255,255,255,0.3)" rx="1"/>
-      <rect x="398" y="145" width="10" height="8" fill="rgba(255,255,255,0.2)" rx="1"/>
-      <rect x="368" y="160" width="10" height="8" fill="rgba(255,255,255,0.25)" rx="1"/>
-      <rect x="383" y="160" width="10" height="8" fill="rgba(255,255,255,0.15)" rx="1"/>
-      <rect x="398" y="160" width="10" height="8" fill="rgba(255,255,255,0.3)" rx="1"/>
-      <!-- Luna -->
-      <circle cx="680" cy="70" r="28" fill="rgba(255,255,255,0.12)"/>
-      <circle cx="668" cy="62" r="22" fill="rgba(111,66,193,0.3)"/>
-      <!-- Suelo -->
-      <rect x="0" y="490" width="800" height="10" fill="rgba(0,0,0,0.2)"/>
-    </svg>
-
     <div class="login-brand">
       <div class="login-logo-wrap">
         <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="login-logo-img">
@@ -73,32 +183,17 @@
       <h1 class="login-brand-title">Generador de Cartas</h1>
       <p class="login-brand-sub">Sistema de gestión documental para comunicaciones de cartera</p>
       <div class="login-stats">
-        <div class="login-stat">
-          <span class="stat-val">PDF</span>
-          <span class="stat-lbl">Automático</span>
-        </div>
+        <div class="login-stat"><span class="stat-val">PDF</span><span class="stat-lbl">Automático</span></div>
         <div class="login-stat-divider"></div>
-        <div class="login-stat">
-          <span class="stat-val">Excel</span>
-          <span class="stat-lbl">Integrado</span>
-        </div>
+        <div class="login-stat"><span class="stat-val">Excel</span><span class="stat-lbl">Integrado</span></div>
         <div class="login-stat-divider"></div>
-        <div class="login-stat">
-          <span class="stat-val">100%</span>
-          <span class="stat-lbl">Digital</span>
-        </div>
+        <div class="login-stat"><span class="stat-val">100%</span><span class="stat-lbl">Digital</span></div>
       </div>
     </div>
   </div>
-
-  <!-- Panel derecho: formulario -->
   <div class="login-right">
     <div class="login-form-card">
-      <!-- Logo móvil -->
-      <div class="login-logo-mobile">
-        <img src="assets/logo.png" alt="Arenas Inmobiliaria">
-      </div>
-
+      <div class="login-logo-mobile"><img src="assets/logo.png" alt="Arenas Inmobiliaria"></div>
       <div class="login-form-header">
         <div class="login-icon-wrap">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -109,61 +204,40 @@
         <h2>Bienvenido</h2>
         <p>Ingrese sus credenciales para acceder al sistema</p>
       </div>
-
       <form id="loginForm" class="login-form" novalidate>
         <div class="form-field" id="fieldUser">
           <label for="username">Usuario</label>
           <div class="field-input-wrap">
-            <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
+            <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <input type="text" id="username" placeholder="Ingrese su usuario" autocomplete="username" spellcheck="false">
           </div>
         </div>
-
         <div class="form-field" id="fieldPass">
           <label for="password">Contraseña</label>
           <div class="field-input-wrap">
-            <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
+            <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <input type="password" id="password" placeholder="Ingrese su contraseña" autocomplete="current-password">
             <button type="button" class="toggle-pwd" id="togglePwd" title="Mostrar/ocultar contraseña">
-              <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
+              <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
         </div>
-
         <div id="loginError" class="login-error" role="alert">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           <span>Usuario o contraseña incorrectos. Verifique e intente nuevamente.</span>
         </div>
-
         <button type="submit" class="btn-login" id="btnLogin">
           <span class="btn-login-text">Ingresar al sistema</span>
-          <svg class="btn-login-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="5" y1="12" x2="19" y2="12"/>
-            <polyline points="12 5 19 12 12 19"/>
-          </svg>
+          <svg class="btn-login-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
       </form>
-
       <p class="login-footer-note">Sistema interno · Arenas Inmobiliaria · Dpto. de Cartera</p>
     </div>
   </div>
 </div><!-- /loginSection -->
 
 
-<!-- ═══════════════════════════ DASHBOARD ═══════════════════════════ -->
+<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
 <div id="dashboardSection" class="dashboard-section" style="display:none;">
 
   <!-- Header -->
@@ -180,7 +254,7 @@
         <div class="dash-avatar">A</div>
         <div class="dash-user-info">
           <span class="dash-user-name">Administrador</span>
-          <span class="dash-user-role">Usuario del sistema</span>
+          <span class="dash-user-role">Arenas Inmobiliaria</span>
         </div>
       </div>
       <button class="btn-darkmode" id="btnDarkMode" title="Cambiar modo">
@@ -201,7 +275,7 @@
           <polyline points="16 17 21 12 16 7"/>
           <line x1="21" y1="12" x2="9" y2="12"/>
         </svg>
-        <span>Cerrar sesión</span>
+        <span>Inicio</span>
       </button>
     </div>
   </header>
@@ -227,7 +301,7 @@
       </div>
     </div>
 
-    <!-- Stepper de pasos -->
+    <!-- Stepper -->
     <div class="stepper" id="stepper">
       <div class="step-item active" id="si1" data-step="1">
         <div class="step-circle">
@@ -309,10 +383,10 @@
       </div>
     </div>
 
-    <!-- ─── Paso 1: Descargar formato ─── -->
+    <!-- Paso 1: Descargar formato -->
     <section class="card" id="cardDownload">
       <div class="card-header">
-        <div class="card-icon-wrap purple">
+        <div class="card-icon-wrap blue">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="7 10 12 15 17 10"/>
@@ -326,34 +400,21 @@
       </div>
       <div class="card-body">
         <div class="download-info">
-          <div class="download-info-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            <span>14 columnas predefinidas</span>
-          </div>
-          <div class="download-info-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            <span>Fila de ejemplo incluida</span>
-          </div>
-          <div class="download-info-item">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-            <span>Compatible con Excel y LibreOffice</span>
-          </div>
+          <div class="download-info-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>14 columnas predefinidas</span></div>
+          <div class="download-info-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Fila de ejemplo incluida</span></div>
+          <div class="download-info-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Compatible con Excel y LibreOffice</span></div>
         </div>
         <button class="btn-primary" id="btnDownloadTemplate">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Descargar formato Excel
         </button>
       </div>
     </section>
 
-    <!-- ─── Paso 2: Cargar Excel ─── -->
+    <!-- Paso 2: Cargar Excel -->
     <section class="card" id="cardUpload">
       <div class="card-header">
-        <div class="card-icon-wrap blue">
+        <div class="card-icon-wrap teal">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="17 8 12 3 7 8"/>
@@ -378,22 +439,18 @@
             <p class="upload-title">Arrastre su archivo Excel aquí</p>
             <p class="upload-sub">o haga clic para seleccionarlo desde su computador</p>
             <button class="btn-secondary" id="btnSelectFile">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-              </svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
               Seleccionar archivo
             </button>
             <p class="upload-hint">Formatos permitidos: .xlsx · .xls</p>
           </div>
         </div>
         <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
-
-        <!-- Mensajes de validación -->
         <div id="validationBox" class="validation-box" style="display:none;"></div>
       </div>
     </section>
 
-    <!-- ─── Tarjeta de archivo cargado ─── -->
+    <!-- Tarjeta archivo cargado -->
     <div class="card file-card" id="fileCard" style="display:none;">
       <div class="file-card-left">
         <div class="file-icon-wrap">
@@ -414,17 +471,12 @@
         </div>
       </div>
       <button class="btn-danger" id="btnClearFile">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="3 6 5 6 21 6"/>
-          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-          <path d="M10 11v6"/><path d="M14 11v6"/>
-          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-        </svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         Eliminar archivo
       </button>
     </div>
 
-    <!-- ─── Paso 3+4: Tabla de clientes ─── -->
+    <!-- Tabla de clientes -->
     <section class="card" id="cardClients" style="display:none;">
       <div class="card-header">
         <div class="card-icon-wrap green">
@@ -441,10 +493,7 @@
             <p>Seleccione un cliente para previsualizar y generar su carta</p>
           </div>
           <div class="search-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" id="searchInput" placeholder="Buscar cliente…" class="search-input">
           </div>
         </div>
@@ -454,26 +503,18 @@
           <table class="client-table" id="clientTable">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Cliente</th>
-                <th>Dirección</th>
-                <th>Conjunto</th>
-                <th>Apto</th>
-                <th>Valor admón.</th>
-                <th>Retroactivo</th>
-                <th>Acción</th>
+                <th>#</th><th>Cliente</th><th>Dirección</th><th>Conjunto</th>
+                <th>Apto</th><th>Valor admón.</th><th>Retroactivo</th><th>Acción</th>
               </tr>
             </thead>
-            <tbody id="clientTableBody">
-            </tbody>
+            <tbody id="clientTableBody"></tbody>
           </table>
         </div>
-        <!-- Vista móvil: tarjetas -->
         <div id="clientCards" class="client-cards-wrap"></div>
       </div>
     </section>
 
-    <!-- ─── Paso 5+6: Previsualización y PDF ─── -->
+    <!-- Previsualización y PDF -->
     <section class="card" id="cardPreview" style="display:none;">
       <div class="card-header">
         <div class="card-icon-wrap orange">
@@ -488,36 +529,22 @@
         </div>
       </div>
       <div class="card-body preview-body">
-
-        <!-- Botones de PDF -->
         <div class="pdf-actions">
           <button class="btn-pdf-main" id="btnPDF">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-            </svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             Generar PDF del cliente seleccionado
           </button>
           <button class="btn-pdf-sec" id="btnPDFAll">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
             PDF consolidado (todos)
           </button>
           <button class="btn-pdf-sec" id="btnPDFZip">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            </svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             Descargar todos en ZIP
           </button>
         </div>
-
-        <!-- Hoja de carta -->
         <div class="letter-sheet-wrap">
           <div class="letter-sheet" id="letterSheet">
-            <!-- Se llena dinámicamente -->
             <div class="letter-placeholder">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -527,25 +554,22 @@
             </div>
           </div>
         </div>
-
       </div>
     </section>
 
-  </main><!-- /dash-main -->
+  </main>
 </div><!-- /dashboardSection -->
 
 
-<!-- ═══════════════════════════ LOADING OVERLAY ═══════════════════════════ -->
+<!-- Loading overlay -->
 <div id="loadingOverlay" class="loading-overlay" style="display:none;">
   <div class="loading-box">
-    <div class="loading-spinner">
-      <div class="spinner-ring"></div>
-    </div>
+    <div class="loading-spinner"><div class="spinner-ring"></div></div>
     <p class="loading-msg" id="loadingMsg">Procesando…</p>
   </div>
 </div>
 
-<!-- ═══════════════════════════ TOAST ═══════════════════════════ -->
+<!-- Toast -->
 <div id="toastContainer" class="toast-container"></div>
 
 <script src="app.js"></script>

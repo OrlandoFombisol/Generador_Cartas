@@ -36,12 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function checkAuth() {
-  /* Login desactivado — acceso directo al sistema */
-  sessionStorage.setItem('ai_logged', '1');
-  showDashboard();
+  showLanding();
 }
 
 function bindEvents() {
+  /* Landing */
+  document.getElementById('btnEnterSystem').addEventListener('click', enterSystem);
+
   /* Login */
   document.getElementById('loginForm').addEventListener('submit', handleLogin);
   document.getElementById('togglePwd').addEventListener('click', togglePassword);
@@ -177,16 +178,38 @@ function animateLoginSuccess() {
   setTimeout(() => showDashboard(), 700);
 }
 
+function showLanding() {
+  const landing = document.getElementById('landingSection');
+  const dash    = document.getElementById('dashboardSection');
+  dash.style.display = 'none';
+  landing.style.display = 'flex';
+  landing.classList.remove('section-exit');
+  landing.classList.add('section-enter');
+  setTimeout(() => landing.classList.remove('section-enter'), 600);
+}
+
+function enterSystem() {
+  const landing = document.getElementById('landingSection');
+  landing.classList.add('section-exit');
+  setTimeout(() => {
+    landing.style.display = 'none';
+    sessionStorage.setItem('ai_logged', '1');
+    showDashboard();
+  }, 380);
+}
+
 function showLogin() {
-  document.getElementById('loginSection').style.display = 'flex';
-  document.getElementById('dashboardSection').style.display = 'none';
+  showLanding();
 }
 
 function showDashboard() {
   document.getElementById('loginSection').style.display = 'none';
+  document.getElementById('landingSection').style.display = 'none';
   const dash = document.getElementById('dashboardSection');
   dash.style.display = 'flex';
   dash.style.flexDirection = 'column';
+  dash.classList.add('section-enter');
+  setTimeout(() => dash.classList.remove('section-enter'), 600);
   setStep(1);
 }
 
@@ -202,8 +225,8 @@ function logout() {
   btn.innerHTML = `<span class="btn-login-text">Ingresar al sistema</span><svg class="btn-login-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
   btn.style.background = '';
   btn.style.boxShadow = '';
-  showLogin();
-  showToast('Sesión cerrada correctamente.', 'info');
+  showLanding();
+  showToast('Volviste al inicio.', 'info');
 }
 
 function togglePassword() {
