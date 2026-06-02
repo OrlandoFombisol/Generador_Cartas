@@ -9,3 +9,5 @@ node_modules/
 # Archivos temporales
 *.tmp
 *.log
+
+.vercel
