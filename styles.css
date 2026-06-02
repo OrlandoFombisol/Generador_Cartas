@@ -293,15 +293,17 @@
 }
 
 .l-nav-brand { display: flex; align-items: center; }
+/* Sin caja — solo el logo flotando */
 .l-nav-logo-wrap {
-  background: rgba(255,255,255,0.09);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.16);
-  border-radius: 12px;
-  padding: 0.5rem 0.95rem;
-  display: inline-flex; align-items: center;
+  display: inline-flex;
+  align-items: center;
 }
-.l-nav-logo { height: 34px; max-width: 170px; object-fit: contain; filter: brightness(0) invert(1); }
+.l-nav-logo {
+  height: 38px;
+  max-width: 180px;
+  object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(43,109,232,0.5));
+}
 
 .l-nav-pill {
   display: flex; align-items: center; gap: 0.45rem;
@@ -1157,40 +1159,42 @@ html.dark .dashboard-section {
   min-height: 210px;
 }
 
-/* ── Cuadro blanco izquierdo con logo ── */
-.dash-banner-logo-card {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1.5px solid rgba(255,255,255,0.28);
-  border-radius: var(--radius-lg);
-  padding: 1.4rem 1.8rem;
-  min-width: 180px;
-  min-height: 130px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.3);
-  animation: logoCardPulse 6s ease-in-out infinite;
-}
-
-@keyframes logoCardPulse {
-  0%,100% { box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.3); }
-  50%     { box-shadow: 0 4px 32px rgba(43,109,232,0.35), inset 0 1px 0 rgba(255,255,255,0.35); }
-}
-
+/* ── Logo directo (sin cuadro) ── */
 .dash-banner-logo-img {
-  width: 140px;
-  max-height: 75px;
+  flex-shrink: 0;
+  width: 200px;
+  max-height: 100px;
   object-fit: contain;
-  filter: brightness(0) invert(1) drop-shadow(0 2px 10px rgba(43,109,232,0.4));
+  filter: brightness(0) invert(1) drop-shadow(0 4px 20px rgba(43,109,232,0.55));
+  animation: bannerLogoEnter 0.9s cubic-bezier(0.16,1,0.3,1) 0.15s both;
 }
 
-/* ── Texto derecho ── */
+@keyframes bannerLogoEnter {
+  from { opacity: 0; transform: translateX(-45px) scale(0.85); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* ── Texto del banner con entrada desde la derecha ── */
 .dash-banner-text {
   display: flex; flex-direction: column; gap: 0.65rem;
   flex: 1; min-width: 0;
+  animation: bannerTextEnter 0.9s cubic-bezier(0.16,1,0.3,1) 0.35s both;
+}
+
+@keyframes bannerTextEnter {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Entrada escalonada de los hijos del banner-text */
+.dash-banner-badge  { animation: bannerChildIn 0.7s cubic-bezier(0.16,1,0.3,1) 0.45s both; }
+.dash-banner-title  { animation: bannerChildIn 0.7s cubic-bezier(0.16,1,0.3,1) 0.55s both; }
+.dash-banner-desc   { animation: bannerChildIn 0.7s cubic-bezier(0.16,1,0.3,1) 0.65s both; }
+.dash-banner-chips  { animation: bannerChildIn 0.7s cubic-bezier(0.16,1,0.3,1) 0.75s both; }
+
+@keyframes bannerChildIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .dash-banner-badge {
@@ -1246,17 +1250,15 @@ html.dark .dash-banner { border-color: rgba(43,109,232,0.3); }
 
 /* ── Banner responsive ── */
 @media (max-width: 860px) {
-  .dash-banner-logo-card { min-width: 140px; min-height: 110px; padding: 1rem 1.3rem; }
-  .dash-banner-logo-img  { width: 110px; }
+  .dash-banner-logo-img { width: 150px; }
 }
 
 @media (max-width: 640px) {
-  .dash-banner-content   { flex-direction: column; align-items: flex-start; padding: 1.3rem; min-height: auto; gap: 1rem; }
-  .dash-banner-logo-card { min-width: 100%; min-height: auto; padding: 1rem; flex-direction: row; justify-content: flex-start; }
-  .dash-banner-logo-img  { width: 100px; }
-  .dash-banner-title     { font-size: 1.2rem; }
-  .dash-banner-chips     { display: none; }
-  .banner-br             { display: none; }
+  .dash-banner-content  { flex-direction: column; align-items: flex-start; padding: 1.3rem; min-height: auto; gap: 1rem; }
+  .dash-banner-logo-img { width: 120px; max-height: 60px; }
+  .dash-banner-title    { font-size: 1.2rem; }
+  .dash-banner-chips    { display: none; }
+  .banner-br            { display: none; }
 }
 
 /* Stepper */
