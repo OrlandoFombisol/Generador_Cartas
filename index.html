@@ -99,14 +99,14 @@
 
   <!-- Nav flotante (arriba) -->
   <header class="l-nav">
+    <div class="l-nav-pill">
+      <span class="l-nav-dot"></span>
+      Sistema activo
+    </div>
     <div class="l-nav-brand">
       <div class="l-nav-logo-wrap">
         <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="l-nav-logo">
       </div>
-    </div>
-    <div class="l-nav-pill">
-      <span class="l-nav-dot"></span>
-      Sistema activo
     </div>
   </header>
 
@@ -116,8 +116,9 @@
     <div class="hero-ring"></div>
     <div class="hero-ring"></div>
     <div class="hero-ring"></div>
-    <!-- Logo -->
-    <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="hero-logo">
+    <!-- Icono 3D -->
+    <img src="assets/icono.png" alt="Arenas Inmobiliaria" class="hero-logo"
+         onerror="this.src='assets/logo.png'">
     <!-- Hint de clic (aparece después) -->
     <div class="hero-hint">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -278,23 +279,98 @@
   <!-- Contenido principal -->
   <main class="dash-main">
 
-    <!-- Intro -->
-    <div class="dash-intro">
-      <div class="dash-intro-text">
-        <h2>Panel de Generación Documental</h2>
-        <p>Para generar las cartas, descargue el formato base en Excel, diligencie los datos de cada cliente y cargue el archivo al sistema para previsualizar y generar los documentos PDF.</p>
+    <!-- Banner principal del dashboard -->
+    <div class="dash-banner">
+
+      <!-- Fondo: gradiente navy + ciudad SVG -->
+      <svg class="dash-banner-city" viewBox="0 0 1200 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice">
+        <!-- Cielo con gradiente de estrellas -->
+        <defs>
+          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.03)"/>
+          </linearGradient>
+          <radialGradient id="moonGlow" cx="85%" cy="25%" r="12%">
+            <stop offset="0%" stop-color="rgba(180,210,255,0.25)"/>
+            <stop offset="100%" stop-color="rgba(180,210,255,0)"/>
+          </radialGradient>
+        </defs>
+        <!-- Estrellas sutiles -->
+        <circle cx="80"  cy="30" r="1.2" fill="rgba(255,255,255,0.45)"/>
+        <circle cx="210" cy="18" r="0.9" fill="rgba(255,255,255,0.35)"/>
+        <circle cx="340" cy="40" r="1.4" fill="rgba(255,255,255,0.5)"/>
+        <circle cx="490" cy="22" r="1"   fill="rgba(255,255,255,0.4)"/>
+        <circle cx="620" cy="35" r="1.3" fill="rgba(255,255,255,0.45)"/>
+        <circle cx="750" cy="14" r="0.8" fill="rgba(255,255,255,0.3)"/>
+        <circle cx="900" cy="28" r="1.2" fill="rgba(255,255,255,0.5)"/>
+        <circle cx="1050" cy="20" r="1" fill="rgba(255,255,255,0.4)"/>
+        <circle cx="1150" cy="42" r="1.3" fill="rgba(255,255,255,0.35)"/>
+        <!-- Luna -->
+        <circle cx="1020" cy="45" r="22" fill="rgba(255,255,255,0.06)"/>
+        <circle cx="1010" cy="38" r="17" fill="rgba(30,77,160,0.25)"/>
+        <circle cx="1020" cy="45" r="22" fill="url(#moonGlow)"/>
+        <!-- Edificios fondo lejano (muy sutiles) -->
+        <rect x="0"   y="150" width="40"  height="70"  fill="rgba(255,255,255,0.04)" rx="2"/>
+        <rect x="42"  y="120" width="30"  height="100" fill="rgba(255,255,255,0.05)" rx="2"/>
+        <rect x="74"  y="138" width="36"  height="82"  fill="rgba(255,255,255,0.04)" rx="2"/>
+        <rect x="112" y="100" width="44"  height="120" fill="rgba(255,255,255,0.06)" rx="2"/>
+        <rect x="158" y="118" width="32"  height="102" fill="rgba(255,255,255,0.04)" rx="2"/>
+        <rect x="192" y="145" width="25"  height="75"  fill="rgba(255,255,255,0.03)" rx="2"/>
+        <rect x="950" y="135" width="35"  height="85"  fill="rgba(255,255,255,0.04)" rx="2"/>
+        <rect x="987" y="105" width="50"  height="115" fill="rgba(255,255,255,0.06)" rx="2"/>
+        <rect x="1040" y="120" width="38" height="100" fill="rgba(255,255,255,0.04)" rx="2"/>
+        <rect x="1080" y="142" width="30" height="78"  fill="rgba(255,255,255,0.03)" rx="2"/>
+        <rect x="1112" y="125" width="42" height="95"  fill="rgba(255,255,255,0.05)" rx="2"/>
+        <rect x="1156" y="148" width="44" height="72"  fill="rgba(255,255,255,0.04)" rx="2"/>
+        <!-- Edificios principales -->
+        <rect x="270" y="90"  width="50"  height="130" fill="rgba(255,255,255,0.08)" rx="3"/>
+        <rect x="322" y="55"  width="65"  height="165" fill="rgba(255,255,255,0.11)" rx="3"/>
+        <rect x="389" y="72"  width="55"  height="148" fill="rgba(255,255,255,0.09)" rx="3"/>
+        <rect x="446" y="102" width="45"  height="118" fill="rgba(255,255,255,0.07)" rx="3"/>
+        <rect x="700" y="85"  width="55"  height="135" fill="rgba(255,255,255,0.09)" rx="3"/>
+        <rect x="757" y="50"  width="70"  height="170" fill="rgba(255,255,255,0.12)" rx="3"/>
+        <rect x="829" y="68"  width="58"  height="152" fill="rgba(255,255,255,0.09)" rx="3"/>
+        <rect x="889" y="108" width="42"  height="112" fill="rgba(255,255,255,0.07)" rx="3"/>
+        <!-- Ventanas edificio central izq -->
+        <rect x="332" y="68"  width="9" height="7" fill="rgba(255,255,255,0.28)" rx="1"/>
+        <rect x="345" y="68"  width="9" height="7" fill="rgba(255,255,255,0.22)" rx="1"/>
+        <rect x="358" y="68"  width="9" height="7" fill="rgba(255,255,255,0.3)"  rx="1"/>
+        <rect x="332" y="82"  width="9" height="7" fill="rgba(255,255,255,0.2)"  rx="1"/>
+        <rect x="345" y="82"  width="9" height="7" fill="rgba(255,255,255,0.32)" rx="1"/>
+        <rect x="358" y="82"  width="9" height="7" fill="rgba(255,255,255,0.18)" rx="1"/>
+        <!-- Ventanas edificio central der -->
+        <rect x="767" y="62"  width="9" height="7" fill="rgba(255,255,255,0.28)" rx="1"/>
+        <rect x="780" y="62"  width="9" height="7" fill="rgba(255,255,255,0.22)" rx="1"/>
+        <rect x="793" y="62"  width="9" height="7" fill="rgba(255,255,255,0.3)"  rx="1"/>
+        <rect x="767" y="76"  width="9" height="7" fill="rgba(255,255,255,0.2)"  rx="1"/>
+        <rect x="780" y="76"  width="9" height="7" fill="rgba(255,255,255,0.32)" rx="1"/>
+        <rect x="793" y="76"  width="9" height="7" fill="rgba(255,255,255,0.18)" rx="1"/>
+        <!-- Suelo -->
+        <rect x="0" y="215" width="1200" height="5" fill="rgba(43,109,232,0.25)"/>
+      </svg>
+
+      <!-- Overlay gradiente para legibilidad -->
+      <div class="dash-banner-overlay"></div>
+
+      <!-- Contenido del banner -->
+      <div class="dash-banner-content">
+        <div class="dash-banner-left">
+          <div class="dash-banner-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span>Sistema Documental Activo</span>
+          </div>
+          <h2 class="dash-banner-title">Panel de Generación<br>Documental</h2>
+          <p class="dash-banner-desc">Descargue el formato, diligencie los datos de clientes y genere cartas PDF con membrete automáticamente.</p>
+        </div>
+        <div class="dash-banner-right">
+          <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="dash-banner-logo">
+        </div>
       </div>
-      <div class="dash-intro-badge">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/>
-          <line x1="16" y1="17" x2="8" y2="17"/>
-          <polyline points="10 9 9 9 8 9"/>
-        </svg>
-        <span>Generación automática de cartas</span>
-      </div>
-    </div>
+
+    </div><!-- /dash-banner -->
 
     <!-- Stepper -->
     <div class="stepper" id="stepper">
