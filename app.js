@@ -197,19 +197,29 @@ function showLanding() {
 }
 
 function enterSystem() {
-  /* Flash portal */
+  const hero  = document.getElementById('heroCard');
   const flash = document.getElementById('warpFlash');
-  if (flash) {
-    flash.classList.add('active');
-    setTimeout(() => flash.classList.remove('active'), 350);
+
+  /* 1. El héroe destella levemente */
+  if (hero) {
+    hero.style.transition = 'filter 0.25s ease, box-shadow 0.25s ease';
+    hero.style.filter     = 'brightness(1.35)';
   }
-  /* Detiene la animación espacial */
-  if (window.SpaceAnim) SpaceAnim.stop();
+
+  /* 2. Velo oscuro se despliega suavemente (600 ms) */
+  if (flash) flash.classList.add('active');
+
+  /* 3. Detiene la animación y muestra el dashboard (750 ms) */
   setTimeout(() => {
+    if (window.SpaceAnim) SpaceAnim.stop();
     document.getElementById('landingSection').style.display = 'none';
+    if (hero) { hero.style.filter = ''; hero.style.transition = ''; }
     sessionStorage.setItem('ai_logged', '1');
     showDashboard();
-  }, 280);
+
+    /* 4. El velo se retira suavemente (500 ms más) */
+    setTimeout(() => { if (flash) flash.classList.remove('active'); }, 80);
+  }, 750);
 }
 
 function showLogin() {

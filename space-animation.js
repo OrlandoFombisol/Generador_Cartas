@@ -12,8 +12,9 @@
     orbitCards:    6,
     cardW:         78,
     cardH:         100,
-    heroDelay:     3200,   // ms antes de que aparezca la tarjeta central
-    contentDelay:  700,    // ms después de que el héroe se asienta
+    heroDelay:     2800,   // ms antes de que aparezca la tarjeta central
+    heroDuration:  4200,   // ms que dura la llegada (lenta para apreciarla)
+    contentDelay:  900,    // ms después de que el héroe se asienta
   };
 
   /* ── Estado ── */
@@ -285,17 +286,30 @@
     }
 
     if (heroState === 'arriving') {
-      const p  = Math.min((elapsed - heroT0) / 2100, 1);
-      const ep = easeOutBack(p);
-      const scale  = 0.05 + ep * 0.95;
-      const rotY   = (1 - easeOutCubic(p)) * 630;
+      const p  = Math.min((elapsed - heroT0) / CFG.heroDuration, 1);
+      /* Dos fases: primera mitad entra girando, segunda mitad desacelera con spring */
+      const pSpin   = Math.min(p * 2, 1);          // giro completa en la 1ª mitad
+      const pSettle = Math.max((p - 0.5) * 2, 0);  // spring en la 2ª mitad
 
-      heroEl.style.opacity   = '' + Math.min(p * 3.5, 1);
+      const scale = 0.04 + easeOutCubic(p) * 0.96;
+      /* Rotación: 720° al inicio → 0° al final, eased independientemente */
+      const rotY  = (1 - easeOutCubic(pSpin)) * 720;
+      /* Glow crece conforme llega */
+      const glowAlpha = easeOutCubic(pSettle);
+
+      heroEl.style.opacity   = '' + Math.min(p * 2.8, 1);
       heroEl.style.transform = `translate(-50%,-50%) scale(${scale}) rotateY(${rotY}deg)`;
+      /* Glow dinámico durante la llegada */
+      if (glowAlpha > 0) {
+        const g = (glowAlpha * 50).toFixed(0);
+        const g2 = (glowAlpha * 100).toFixed(0);
+        heroEl.style.boxShadow = `0 0 ${g}px rgba(43,109,232,${(glowAlpha * 0.6).toFixed(2)}), 0 0 ${g2}px rgba(43,109,232,${(glowAlpha * 0.25).toFixed(2)}), inset 0 0 40px rgba(43,109,232,0.08)`;
+      }
 
       if (p >= 1) {
         heroState = 'settled';
         heroEl.classList.add('hero-ready');
+        heroEl.style.boxShadow = '';  /* el CSS toma el control */
         setTimeout(() => {
           if (contentEl) contentEl.classList.add('l-content-show');
           if (onReadyCb) onReadyCb();
@@ -305,7 +319,7 @@
 
     if (heroState === 'settled') {
       /* Respiración suave */
-      const breathe = 1 + 0.022 * Math.sin(t * 0.0014 * 60);
+      const breathe = 1 + 0.018 * Math.sin(t * 0.001 * 60);
       heroEl.style.transform = `translate(-50%,-50%) scale(${breathe})`;
     }
   }
