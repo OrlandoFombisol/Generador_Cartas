@@ -116,12 +116,12 @@
     <div class="hero-ring"></div>
     <div class="hero-ring"></div>
     <div class="hero-ring"></div>
-    <!-- Icono 3D -->
-    <img src="assets/icono.png" alt="Arenas Inmobiliaria" class="hero-logo"
+    <!-- Icono 3D (grande, protagonista) -->
+    <img src="assets/icono.png" alt="Ingresar" class="hero-logo"
          onerror="this.src='assets/logo.png'">
-    <!-- Hint de clic (aparece después) -->
+    <!-- Hint de clic -->
     <div class="hero-hint">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
         <polyline points="10 17 15 12 10 7"/>
         <line x1="15" y1="12" x2="3" y2="12"/>
@@ -247,9 +247,9 @@
     </div>
     <div class="dash-header-right">
       <div class="dash-user">
-        <div class="dash-avatar">A</div>
+        <div class="dash-avatar">CG</div>
         <div class="dash-user-info">
-          <span class="dash-user-name">Administrador</span>
+          <span class="dash-user-name">Cristian Galvan</span>
           <span class="dash-user-role">Arenas Inmobiliaria</span>
         </div>
       </div>
@@ -352,22 +352,39 @@
       <!-- Overlay gradiente para legibilidad -->
       <div class="dash-banner-overlay"></div>
 
+      <!-- Partículas flotantes del banner -->
+      <div class="banner-particles" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+
       <!-- Contenido del banner -->
       <div class="dash-banner-content">
-        <div class="dash-banner-left">
+
+        <!-- Cuadro blanco izquierdo · logo empresa -->
+        <div class="dash-banner-logo-card">
+          <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="dash-banner-logo-img">
+        </div>
+
+        <!-- Texto derecho -->
+        <div class="dash-banner-text">
           <div class="dash-banner-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <span class="banner-badge-dot"></span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
             </svg>
             <span>Sistema Documental Activo</span>
           </div>
-          <h2 class="dash-banner-title">Panel de Generación<br>Documental</h2>
-          <p class="dash-banner-desc">Descargue el formato, diligencie los datos de clientes y genere cartas PDF con membrete automáticamente.</p>
+          <h2 class="dash-banner-title">Panel de Generación<br class="banner-br">Documental</h2>
+          <p class="dash-banner-desc">Descargue el formato Excel, diligencie los datos y genere cartas PDF con membrete en segundos.</p>
+          <div class="dash-banner-chips">
+            <span class="banner-chip">PDF con membrete</span>
+            <span class="banner-chip">Descarga ZIP</span>
+            <span class="banner-chip">100% Digital</span>
+          </div>
         </div>
-        <div class="dash-banner-right">
-          <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="dash-banner-logo">
-        </div>
+
       </div>
 
     </div><!-- /dash-banner -->

@@ -324,16 +324,85 @@
   50%      { opacity: 0.5; box-shadow: 0 0 14px #4ADE80; }
 }
 
-/* ─────────────────────── Responsive space ── */
+/* ════════════════════════════════════
+   RESPONSIVE COMPLETO · LANDING + DASHBOARD
+════════════════════════════════════ */
+
+/* ── Tablet grande ── */
+@media (max-width: 900px) {
+  .hero-card  { width: 185px; height: 185px; }
+  .hero-logo  { width: 130px; max-height: 72px; }
+  .l-title    { font-size: 2.8rem; }
+  .l-content  { bottom: 70px; }
+}
+
+/* ── Tablet / móvil grande ── */
 @media (max-width: 640px) {
-  .hero-card { width: 170px; height: 170px; }
-  .hero-logo { width: 110px; max-height: 60px; }
-  .l-title { font-size: 1.8rem; }
-  .l-content { bottom: 65px; }
-  .l-nav { padding: 1rem; }
-  .l-nav-pill { display: none; }
-  .l-stats { padding: 0.8rem 1rem; }
-  .l-stat { padding: 0.3rem 0.9rem; }
+  /* Hero card */
+  .hero-card  { width: 155px; height: 155px; top: 42%; }
+  .hero-logo  { width: 100px; max-height: 58px; }
+  .hero-hint  { font-size: 0.62rem; gap: 4px; }
+
+  /* Texto landing */
+  .l-title    { font-size: 2rem; }
+  .l-eyebrow-text { font-size: 0.68rem; }
+  .l-content  { bottom: 58px; padding: 0 1rem; }
+  .l-pills    { gap: 0.35rem; }
+  .l-pill     { font-size: 0.68rem; padding: 0.25rem 0.6rem; }
+
+  /* Nav */
+  .l-nav        { padding: 0.9rem 1rem; }
+  .l-nav-pill   { display: none; }
+  .l-nav-logo   { height: 28px; }
+
+  /* Stats footer */
+  .l-stats     { padding: 0.7rem 0.5rem; }
+  .l-stat      { padding: 0.25rem 0.7rem; }
+  .l-stat-val  { font-size: 0.88rem; }
+  .l-stat-lbl  { font-size: 0.62rem; }
+  .l-stat-sep  { height: 20px; }
+
+  /* Orbit cards más pequeñas */
+  .orbit-card  { width: 56px; height: 72px; }
+  .oc-head     { height: 18px; }
+  .oc-body     { padding: 5px 6px; gap: 3px; }
+  .oc-line     { height: 2px; }
+}
+
+/* ── Móvil pequeño ── */
+@media (max-width: 420px) {
+  .hero-card   { width: 135px; height: 135px; top: 40%; }
+  .hero-logo   { width: 85px; max-height: 50px; }
+  .l-title     { font-size: 1.7rem; }
+  .l-content   { bottom: 55px; }
+  .orbit-card  { width: 48px; height: 62px; }
+}
+
+/* ── Dashboard móvil ── */
+@media (max-width: 640px) {
+  .dash-header { padding: 0 0.8rem; height: 54px; }
+  .dash-logo   { height: 28px; }
+  .dash-avatar { width: 30px; height: 30px; font-size: 0.7rem; }
+  .dash-user-info { display: none; }
+  .btn-logout span { display: none; }
+  .btn-logout { padding: 0.45rem; }
+  .dash-main  { padding: 0.85rem 0.7rem 3rem; gap: 0.9rem; }
+  .dash-intro-text h2 { font-size: 1rem; }
+  .stepper    { padding: 0.8rem 0.9rem; }
+  .card-header { padding: 1rem 1.1rem; }
+  .card-body   { padding: 1.1rem; }
+  .upload-zone-inner { padding: 1.8rem 0.9rem; }
+  .table-wrap  { display: none; }
+  .client-cards-wrap { display: flex !important; }
+  .letter-sheet { padding: 1.8rem 1.2rem; }
+  .pdf-actions { flex-direction: column; align-items: stretch; }
+  .btn-pdf-main, .btn-pdf-sec { justify-content: center; width: 100%; }
+  .toast-container { left: 0.6rem; right: 0.6rem; bottom: 0.8rem; }
+  .toast { max-width: none; font-size: 0.82rem; }
+  .stepper .step-label { display: none; }
+  .stepper .step-connector { min-width: 10px; }
+  .dash-title-wrap { display: none; }
+  .dash-user-info  { display: none; }
 }
 
 /* ── Variables modo claro ── */
@@ -991,109 +1060,203 @@ html.dark .dashboard-section {
   border: 1px solid rgba(30,77,160,0.2);
 }
 
-/* ── Dashboard Banner ── */
+/* ══════════════════════════════════════════════════════════
+   DASHBOARD BANNER ANIMADO
+══════════════════════════════════════════════════════════ */
+
 .dash-banner {
   position: relative;
   border-radius: var(--radius-xl);
   overflow: hidden;
-  background: linear-gradient(130deg, #060E1E 0%, #0D1F3C 35%, #142B58 70%, #0A1628 100%);
-  min-height: 200px;
-  animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.08s both;
-  border: 1px solid rgba(43,109,232,0.2);
+  /* Gradiente animado */
+  background: linear-gradient(-50deg, #060E1E, #0D1F3C, #142B58, #0A1628, #0E2550, #060E1E);
+  background-size: 400% 400%;
+  animation: bannerGrad 14s ease infinite, slideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.08s both;
+  min-height: 210px;
+  border: 1px solid rgba(43,109,232,0.25);
   box-shadow: 0 8px 40px rgba(0,20,60,0.35);
 }
 
+@keyframes bannerGrad {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Barrido de luz */
+.dash-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(43,109,232,0.07) 50%, transparent 100%);
+  animation: bannerShimmer 7s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes bannerShimmer {
+  0%       { transform: translateX(-100%); }
+  55%,100% { transform: translateX(200%); }
+}
+
+/* Ciudad SVG */
 .dash-banner-city {
   position: absolute;
   bottom: 0; left: 0; right: 0;
   width: 100%; height: 100%;
   pointer-events: none;
   z-index: 0;
+  animation: cityFloat 9s ease-in-out infinite;
 }
 
+@keyframes cityFloat {
+  0%,100% { transform: translateY(0px); }
+  50%     { transform: translateY(-5px); }
+}
+
+/* Overlay */
 .dash-banner-overlay {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse at 25% 50%, rgba(43,109,232,0.14) 0%, transparent 65%),
-    radial-gradient(ellipse at 78% 30%, rgba(200,161,42,0.07) 0%, transparent 50%),
-    linear-gradient(to right, rgba(6,14,30,0.5) 0%, transparent 50%, rgba(6,14,30,0.3) 100%);
-  z-index: 1;
-  pointer-events: none;
+    radial-gradient(ellipse at 30% 60%, rgba(43,109,232,0.14) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(200,161,42,0.07) 0%, transparent 50%);
+  z-index: 1; pointer-events: none;
 }
 
+/* Partículas flotantes del banner */
+.banner-particles {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+}
+.banner-particles span {
+  position: absolute;
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: rgba(100,180,255,0.5);
+  animation: bParticle 8s ease-in-out infinite;
+}
+.banner-particles span:nth-child(1) { left: 12%;  top: 30%; animation-delay: 0s;   animation-duration: 7s; }
+.banner-particles span:nth-child(2) { left: 28%;  top: 60%; animation-delay: 1.5s; animation-duration: 9s; }
+.banner-particles span:nth-child(3) { left: 55%;  top: 25%; animation-delay: 0.8s; animation-duration: 8s; }
+.banner-particles span:nth-child(4) { left: 70%;  top: 70%; animation-delay: 2.2s; animation-duration: 6s; }
+.banner-particles span:nth-child(5) { left: 85%;  top: 40%; animation-delay: 0.3s; animation-duration: 10s; }
+.banner-particles span:nth-child(6) { left: 42%;  top: 80%; animation-delay: 3s;   animation-duration: 7s; }
+
+@keyframes bParticle {
+  0%,100% { transform: translate(0, 0) scale(1);   opacity: 0.5; }
+  33%     { transform: translate(12px, -18px) scale(1.4); opacity: 0.9; }
+  66%     { transform: translate(-8px, -10px) scale(0.8); opacity: 0.3; }
+}
+
+/* Contenido del banner */
 .dash-banner-content {
-  position: relative;
-  z-index: 2;
+  position: relative; z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 2rem 2.5rem;
-  gap: 1.5rem;
-  min-height: 200px;
+  gap: 2rem;
+  padding: 1.8rem 2.2rem;
+  min-height: 210px;
 }
 
-.dash-banner-left {
+/* ── Cuadro blanco izquierdo con logo ── */
+.dash-banner-logo-card {
+  flex-shrink: 0;
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  max-width: 560px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1.5px solid rgba(255,255,255,0.28);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem 1.8rem;
+  min-width: 180px;
+  min-height: 130px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.3);
+  animation: logoCardPulse 6s ease-in-out infinite;
+}
+
+@keyframes logoCardPulse {
+  0%,100% { box-shadow: 0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.3); }
+  50%     { box-shadow: 0 4px 32px rgba(43,109,232,0.35), inset 0 1px 0 rgba(255,255,255,0.35); }
+}
+
+.dash-banner-logo-img {
+  width: 140px;
+  max-height: 75px;
+  object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 2px 10px rgba(43,109,232,0.4));
+}
+
+/* ── Texto derecho ── */
+.dash-banner-text {
+  display: flex; flex-direction: column; gap: 0.65rem;
+  flex: 1; min-width: 0;
 }
 
 .dash-banner-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
+  display: inline-flex; align-items: center; gap: 0.45rem;
   background: rgba(43,109,232,0.18);
   border: 1px solid rgba(43,109,232,0.3);
   border-radius: 999px;
   padding: 0.28rem 0.85rem;
-  font-size: 0.73rem;
-  font-weight: 600;
-  color: rgba(180,215,255,0.85);
+  font-size: 0.72rem; font-weight: 600;
+  color: rgba(180,215,255,0.9);
   letter-spacing: 0.04em;
   width: fit-content;
 }
 .dash-banner-badge svg { flex-shrink: 0; }
 
+.banner-badge-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #4ADE80; box-shadow: 0 0 6px #4ADE80;
+  animation: dotPulse 2.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
 .dash-banner-title {
-  font-size: clamp(1.35rem, 2.5vw, 1.9rem);
+  font-size: clamp(1.3rem, 2.8vw, 2rem);
   font-weight: 800;
   color: #ffffff;
-  line-height: 1.18;
+  line-height: 1.15;
   letter-spacing: -0.02em;
 }
 
 .dash-banner-desc {
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   color: rgba(180,210,255,0.65);
   line-height: 1.6;
-  max-width: 480px;
+  max-width: 440px;
 }
 
-.dash-banner-right {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.dash-banner-chips {
+  display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.2rem;
 }
 
-.dash-banner-logo {
-  height: 90px;
-  max-width: 260px;
-  object-fit: contain;
-  filter: brightness(0) invert(1) drop-shadow(0 2px 16px rgba(43,109,232,0.5));
-  opacity: 0.92;
+.banner-chip {
+  display: inline-flex; align-items: center;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.72rem; font-weight: 500;
+  color: rgba(200,225,255,0.75);
 }
 
-/* Dark mode banner */
 html.dark .dash-banner { border-color: rgba(43,109,232,0.3); }
 
-/* Banner responsive */
-@media (max-width: 700px) {
-  .dash-banner-content { flex-direction: column; align-items: flex-start; padding: 1.5rem; min-height: auto; gap: 1rem; }
-  .dash-banner-right { display: none; }
-  .dash-banner-title { font-size: 1.3rem; }
+/* ── Banner responsive ── */
+@media (max-width: 860px) {
+  .dash-banner-logo-card { min-width: 140px; min-height: 110px; padding: 1rem 1.3rem; }
+  .dash-banner-logo-img  { width: 110px; }
+}
+
+@media (max-width: 640px) {
+  .dash-banner-content   { flex-direction: column; align-items: flex-start; padding: 1.3rem; min-height: auto; gap: 1rem; }
+  .dash-banner-logo-card { min-width: 100%; min-height: auto; padding: 1rem; flex-direction: row; justify-content: flex-start; }
+  .dash-banner-logo-img  { width: 100px; }
+  .dash-banner-title     { font-size: 1.2rem; }
+  .dash-banner-chips     { display: none; }
+  .banner-br             { display: none; }
 }
 
 /* Stepper */

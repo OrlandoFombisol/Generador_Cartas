@@ -183,10 +183,20 @@
     return { ...pos[i % pos.length] };
   }
 
+  /* Escala de órbita según tamaño de pantalla */
+  function orbitScale() {
+    const w = window.innerWidth;
+    if (w < 420)  return 0.38;
+    if (w < 640)  return 0.52;
+    if (w < 900)  return 0.72;
+    return 1;
+  }
+
   function buildOrbitCards() {
     const els = document.querySelectorAll('.orbit-card');
     cards = [];
     const total = els.length;
+    const sc = orbitScale();
 
     els.forEach((el, i) => {
       const orb  = ORBITS[i % ORBITS.length];
@@ -197,15 +207,17 @@
         el,
         x: spawn.x, y: spawn.y,
         spawnX: spawn.x, spawnY: spawn.y,
-        orbitA: orb.a, orbitB: orb.b, orbitTilt: orb.tilt,
+        orbitA: orb.a * sc, orbitB: orb.b * sc, orbitTilt: orb.tilt,
         angle: ang0,
-        speed: (0.0016 + Math.random() * 0.0014) * (i % 2 === 0 ? 1 : -1),
-        delay:    i * 320 + 380,    // stagger de entrada
-        shotDur:  1700 + Math.random() * 500,
-        trail:    [],
+        /* ← más lento: 0.0006–0.0011 rad/frame (antes 0.0016–0.003) */
+        speed: (0.0006 + Math.random() * 0.0005) * (i % 2 === 0 ? 1 : -1),
+        delay:   i * 380 + 350,
+        /* ← entrada más lenta: 3–4 s (antes 1.7–2.2 s) */
+        shotDur: 3000 + Math.random() * 1000,
+        trail:      [],
         trailAlpha: 1,
-        arrived:  false,
-        opacity:  0,
+        arrived:    false,
+        opacity:    0,
         rotX: (Math.random() - 0.5) * 24,
         rotZ: (Math.random() - 0.5) * 16,
       });
