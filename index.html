@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generador de Cartas · Arenas Inmobiliaria</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="libs/xlsx.full.min.js"></script>
+  <script src="libs/jspdf.umd.min.js"></script>
+  <script src="libs/html2canvas.min.js"></script>
+  <script src="libs/jszip.min.js"></script>
+  <script src="libs/FileSaver.min.js"></script>
+  <script src="libs/pdf-lib.min.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════════ LANDING · ESPACIO ═══════════════════ -->
+<div id="landingSection" class="landing-section">
+
+  <!-- Canvas: espacio, estrellas, rastros de cometa -->
+  <canvas id="spaceCanvas" class="space-canvas"></canvas>
+
+  <!-- Flash de transición (portal de entrada) -->
+  <div id="warpFlash" class="warp-flash"></div>
+
+  <!-- Cartas que orbitan como asteroides -->
+  <div id="orbitStage" class="orbit-stage">
+
+    <div class="orbit-card" id="oc0">
+      <div class="oc-head oc-head-blue"></div>
+      <div class="oc-body">
+        <div class="oc-line"></div>
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line oc-s"></div>
+      </div>
+    </div>
+
+    <div class="orbit-card" id="oc1">
+      <div class="oc-head oc-head-teal"></div>
+      <div class="oc-body">
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+      </div>
+    </div>
+
+    <div class="orbit-card" id="oc2">
+      <div class="oc-head oc-head-gold"></div>
+      <div class="oc-body">
+        <div class="oc-line"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line oc-s"></div>
+      </div>
+    </div>
+
+    <div class="orbit-card" id="oc3">
+      <div class="oc-head oc-head-blue"></div>
+      <div class="oc-body">
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-s"></div>
+      </div>
+    </div>
+
+    <div class="orbit-card" id="oc4">
+      <div class="oc-head oc-head-teal"></div>
+      <div class="oc-body">
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+      </div>
+    </div>
+
+    <div class="orbit-card" id="oc5">
+      <div class="oc-head oc-head-gold"></div>
+      <div class="oc-body">
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line oc-s"></div>
+        <div class="oc-line"></div>
+        <div class="oc-line oc-m"></div>
+        <div class="oc-line"></div>
+      </div>
+    </div>
+
+  </div><!-- /orbitStage -->
+
+  <!-- Nav flotante (arriba) -->
+  <header class="l-nav">
+    <div class="l-nav-pill">
+      <span class="l-nav-dot"></span>
+      Sistema activo
+    </div>
+    <div class="l-nav-brand">
+      <div class="l-nav-logo-wrap">
+        <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="l-nav-logo">
+      </div>
+    </div>
+  </header>
+
+  <!-- Tarjeta héroe central (aparece con animación 3D) -->
+  <div id="heroCard" class="hero-card" style="display:none; opacity:0">
+    <!-- Anillos pulsantes -->
+    <div class="hero-ring"></div>
+    <div class="hero-ring"></div>
+    <div class="hero-ring"></div>
+    <!-- Icono 3D (grande, protagonista) -->
+    <img src="assets/icono.png" alt="Ingresar" class="hero-logo"
+         onerror="this.src='assets/logo.png'">
+    <!-- Hint de clic -->
+    <div class="hero-hint">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+      </svg>
+      <span>Ingresar al sistema</span>
+    </div>
+  </div>
+
+  <!-- Contenido textual (aparece después de la animación) -->
+  <div id="landingContent" class="l-content">
+    <p class="l-eyebrow-text">Plataforma Documental · Arenas Inmobiliaria</p>
+    <h1 class="l-title">Generador de <em>Cartas</em></h1>
+    <div class="l-pills">
+      <span class="l-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        PDF Automático
+      </span>
+      <span class="l-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Excel Integrado
+      </span>
+      <span class="l-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        100% Digital
+      </span>
+      <span class="l-pill">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Descarga ZIP
+      </span>
+    </div>
+  </div>
+
+  <!-- Barra inferior de stats -->
+  <footer class="l-stats">
+    <div class="l-stat"><span class="l-stat-val">PDF</span><span class="l-stat-lbl">Generación automática</span></div>
+    <div class="l-stat-sep"></div>
+    <div class="l-stat"><span class="l-stat-val">Excel</span><span class="l-stat-lbl">Formato base incluido</span></div>
+    <div class="l-stat-sep"></div>
+    <div class="l-stat"><span class="l-stat-val">ZIP</span><span class="l-stat-lbl">Descarga masiva</span></div>
+    <div class="l-stat-sep"></div>
+    <div class="l-stat"><span class="l-stat-val">100%</span><span class="l-stat-lbl">Digital sin papel</span></div>
+  </footer>
+
+</div><!-- /landingSection -->
+
+
+<!-- ═══════════════════ LOGIN (oculto, requerido por app.js) ═══════════════════ -->
+<div id="loginSection" class="login-section" style="display:none;">
+  <div class="login-left">
+    <div class="login-left-overlay"></div>
+    <div class="login-brand">
+      <div class="login-logo-wrap">
+        <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="login-logo-img">
+      </div>
+      <h1 class="login-brand-title">Generador de Cartas</h1>
+      <p class="login-brand-sub">Sistema de gestión documental para comunicaciones de cartera</p>
+      <div class="login-stats">
+        <div class="login-stat"><span class="stat-val">PDF</span><span class="stat-lbl">Automático</span></div>
+        <div class="login-stat-divider"></div>
+        <div class="login-stat"><span class="stat-val">Excel</span><span class="stat-lbl">Integrado</span></div>
+        <div class="login-stat-divider"></div>
+        <div class="login-stat"><span class="stat-val">100%</span><span class="stat-lbl">Digital</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-form-card">
+      <div class="login-logo-mobile"><img src="assets/logo.png" alt="Arenas Inmobiliaria"></div>
+      <div class="login-form-header">
+        <div class="login-icon-wrap">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h2>Bienvenido</h2>
+        <p>Ingrese sus credenciales para acceder al sistema</p>
+      </div>
+      <form id="loginForm" class="login-form" novalidate>
+        <div class="form-field" id="fieldUser">
+          <label for="username">Usuario</label>
+          <div class="field-input-wrap">
+            <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="username" placeholder="Ingrese su usuario" autocomplete="username" spellcheck="false">
+          </div>
+        </div>
+        <div class="form-field" id="fieldPass">
+          <label for="password">Contraseña</label>
+          <div class="field-input-wrap">
+            <svg class="field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input type="password" id="password" placeholder="Ingrese su contraseña" autocomplete="current-password">
+            <button type="button" class="toggle-pwd" id="togglePwd" title="Mostrar/ocultar contraseña">
+              <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="loginError" class="login-error" role="alert">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Usuario o contraseña incorrectos. Verifique e intente nuevamente.</span>
+        </div>
+        <button type="submit" class="btn-login" id="btnLogin">
+          <span class="btn-login-text">Ingresar al sistema</span>
+          <svg class="btn-login-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+      </form>
+      <p class="login-footer-note">Sistema interno · Arenas Inmobiliaria · Dpto. de Cartera</p>
+    </div>
+  </div>
+</div><!-- /loginSection -->
+
+
+<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+<div id="dashboardSection" class="dashboard-section" style="display:none;">
+
+  <!-- Header -->
+  <header class="dash-header">
+    <div class="dash-header-left">
+      <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="dash-logo">
+      <div class="dash-title-wrap">
+        <span class="dash-title">Generador de Cartas</span>
+        <span class="dash-subtitle">Sistema Documental · Dpto. de Cartera</span>
+      </div>
+    </div>
+    <div class="dash-header-right">
+      <div class="dash-user">
+        <div class="dash-avatar">CG</div>
+        <div class="dash-user-info">
+          <span class="dash-user-name">Cristian Galvan</span>
+          <span class="dash-user-role">Arenas Inmobiliaria</span>
+        </div>
+      </div>
+      <button class="btn-darkmode" id="btnDarkMode" title="Cambiar modo">
+        <svg id="iconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg id="iconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <button class="btn-logout" id="btnLogout">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span>Inicio</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="dash-main">
+
+    <!-- Banner principal del dashboard -->
+    <div class="dash-banner">
+
+      <!-- Fondo: gradiente navy + ciudad SVG -->
+      <svg class="dash-banner-city" viewBox="0 0 1200 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice">
+        <!-- Cielo con gradiente de estrellas -->
+        <defs>
+          <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.03)"/>
+          </linearGradient>
+          <radialGradient id="moonGlow" cx="85%" cy="25%" r="12%">
+            <stop offset="0%" stop-color="rgba(180,210,255,0.25)"/>
+            <stop offset="100%" stop-color="rgba(180,210,255,0)"/>
+          </radialGradient>
+        </defs>
+        <!-- Estrellas sutiles -->
+        <circle cx="80"  cy="30" r="1.2" fill="rgba(255,255,255,0.45)"/>
+        <circle cx="210" cy="18" r="0.9" fill="rgba(255,255,255,0.35)"/>
+        <circle cx="340" cy="40" r="1.4" fill="rgba(255,255,255,0.5)"/>
+        <circle cx="490" cy="22" r="1"   fill="rgba(255,255,255,0.4)"/>
+        <circle cx="620" cy="35" r="1.3" fill="rgba(255,255,255,0.45)"/>
+        <circle cx="750" cy="14" r="0.8" fill="rgba(255,255,255,0.3)"/>
+        <circle cx="900" cy="28" r="1.2" fill="rgba(255,255,255,0.5)"/>
+        <circle cx="1050" cy="20" r="1" fill="rgba(255,255,255,0.4)"/>
+        <circle cx="1150" cy="42" r="1.3" fill="rgba(255,255,255,0.35)"/>
+        <!-- Luna -->
+        <circle cx="1020" cy="45" r="22" fill="rgba(255,255,255,0.06)"/>
+        <circle cx="1010" cy="38" r="17" fill="rgba(30,77,160,0.25)"/>
+        <circle cx="1020" cy="45" r="22" fill="url(#moonGlow)"/>
+        <!-- Edificios fondo lejano (muy sutiles) -->
+        <rect x="0"   y="150" width="40"  height="70"  fill="rgba(255,255,255,0.04)" rx="2"/>
+        <rect x="42"  y="120" width="30"  height="100" fill="rgba(255,255,255,0.05)" rx="2"/>
+        <rect x="74"  y="138" width="36"  height="82"  fill="rgba(255,255,255,0.04)" rx="2"/>
+        <rect x="112" y="100" width="44"  height="120" fill="rgba(255,255,255,0.06)" rx="2"/>
+        <rect x="158" y="118" width="32"  height="102" fill="rgba(255,255,255,0.04)" rx="2"/>
+        <rect x="192" y="145" width="25"  height="75"  fill="rgba(255,255,255,0.03)" rx="2"/>
+        <rect x="950" y="135" width="35"  height="85"  fill="rgba(255,255,255,0.04)" rx="2"/>
+        <rect x="987" y="105" width="50"  height="115" fill="rgba(255,255,255,0.06)" rx="2"/>
+        <rect x="1040" y="120" width="38" height="100" fill="rgba(255,255,255,0.04)" rx="2"/>
+        <rect x="1080" y="142" width="30" height="78"  fill="rgba(255,255,255,0.03)" rx="2"/>
+        <rect x="1112" y="125" width="42" height="95"  fill="rgba(255,255,255,0.05)" rx="2"/>
+        <rect x="1156" y="148" width="44" height="72"  fill="rgba(255,255,255,0.04)" rx="2"/>
+        <!-- Edificios principales -->
+        <rect x="270" y="90"  width="50"  height="130" fill="rgba(255,255,255,0.08)" rx="3"/>
+        <rect x="322" y="55"  width="65"  height="165" fill="rgba(255,255,255,0.11)" rx="3"/>
+        <rect x="389" y="72"  width="55"  height="148" fill="rgba(255,255,255,0.09)" rx="3"/>
+        <rect x="446" y="102" width="45"  height="118" fill="rgba(255,255,255,0.07)" rx="3"/>
+        <rect x="700" y="85"  width="55"  height="135" fill="rgba(255,255,255,0.09)" rx="3"/>
+        <rect x="757" y="50"  width="70"  height="170" fill="rgba(255,255,255,0.12)" rx="3"/>
+        <rect x="829" y="68"  width="58"  height="152" fill="rgba(255,255,255,0.09)" rx="3"/>
+        <rect x="889" y="108" width="42"  height="112" fill="rgba(255,255,255,0.07)" rx="3"/>
+        <!-- Ventanas edificio central izq -->
+        <rect x="332" y="68"  width="9" height="7" fill="rgba(255,255,255,0.28)" rx="1"/>
+        <rect x="345" y="68"  width="9" height="7" fill="rgba(255,255,255,0.22)" rx="1"/>
+        <rect x="358" y="68"  width="9" height="7" fill="rgba(255,255,255,0.3)"  rx="1"/>
+        <rect x="332" y="82"  width="9" height="7" fill="rgba(255,255,255,0.2)"  rx="1"/>
+        <rect x="345" y="82"  width="9" height="7" fill="rgba(255,255,255,0.32)" rx="1"/>
+        <rect x="358" y="82"  width="9" height="7" fill="rgba(255,255,255,0.18)" rx="1"/>
+        <!-- Ventanas edificio central der -->
+        <rect x="767" y="62"  width="9" height="7" fill="rgba(255,255,255,0.28)" rx="1"/>
+        <rect x="780" y="62"  width="9" height="7" fill="rgba(255,255,255,0.22)" rx="1"/>
+        <rect x="793" y="62"  width="9" height="7" fill="rgba(255,255,255,0.3)"  rx="1"/>
+        <rect x="767" y="76"  width="9" height="7" fill="rgba(255,255,255,0.2)"  rx="1"/>
+        <rect x="780" y="76"  width="9" height="7" fill="rgba(255,255,255,0.32)" rx="1"/>
+        <rect x="793" y="76"  width="9" height="7" fill="rgba(255,255,255,0.18)" rx="1"/>
+        <!-- Suelo -->
+        <rect x="0" y="215" width="1200" height="5" fill="rgba(43,109,232,0.25)"/>
+      </svg>
+
+      <!-- Overlay gradiente para legibilidad -->
+      <div class="dash-banner-overlay"></div>
+
+      <!-- Partículas flotantes del banner -->
+      <div class="banner-particles" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+
+      <!-- Contenido del banner -->
+      <div class="dash-banner-content">
+
+        <!-- Logo empresa directo, sin cuadro -->
+        <img src="assets/logo.png" alt="Arenas Inmobiliaria" class="dash-banner-logo-img">
+
+        <!-- Texto derecho -->
+        <div class="dash-banner-text">
+          <div class="dash-banner-badge">
+            <span class="banner-badge-dot"></span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            <span>Sistema Documental Activo</span>
+          </div>
+          <h2 class="dash-banner-title">Panel de Generación<br class="banner-br">Documental</h2>
+          <p class="dash-banner-desc">Descargue el formato Excel, diligencie los datos y genere cartas PDF con membrete en segundos.</p>
+          <div class="dash-banner-chips">
+            <span class="banner-chip">PDF con membrete</span>
+            <span class="banner-chip">Descarga ZIP</span>
+            <span class="banner-chip">100% Digital</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div><!-- /dash-banner -->
+
+    <!-- ══ SELECTOR DE MÓDULO ══ -->
+    <div class="module-selector" id="moduleSelector">
+      <button class="module-card admin-card active" id="btnModuleAdmin" data-module="admin">
+        <div class="module-card-icon blue">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </div>
+        <div class="module-card-content">
+          <span class="module-card-title">Cartas de Administración</span>
+          <span class="module-card-desc">Aumentos de cuota de administración con cobro retroactivo</span>
+        </div>
+        <span class="module-active-pill" id="pillAdmin">Activo</span>
+      </button>
+      <button class="module-card desoc-card" id="btnModuleDesoc" data-module="desoc">
+        <div class="module-card-icon orange">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </div>
+        <div class="module-card-content">
+          <span class="module-card-title">Cartas de Desocupación</span>
+          <span class="module-card-desc">Requerimiento de entrega voluntaria del inmueble</span>
+        </div>
+        <span class="module-active-pill" id="pillDesoc" style="display:none">Activo</span>
+      </button>
+    </div>
+
+    <!-- Stepper -->
+    <div class="stepper" id="stepper">
+      <div class="step-item active" id="si1" data-step="1">
+        <div class="step-circle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </div>
+        <div class="step-label">
+          <span class="step-num">Paso 1</span>
+          <span class="step-text">Descargar formato</span>
+        </div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-item" id="si2" data-step="2">
+        <div class="step-circle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="step-label">
+          <span class="step-num">Paso 2</span>
+          <span class="step-text">Cargar Excel</span>
+        </div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-item" id="si3" data-step="3">
+        <div class="step-circle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div class="step-label">
+          <span class="step-num">Paso 3</span>
+          <span class="step-text">Validar datos</span>
+        </div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-item" id="si4" data-step="4">
+        <div class="step-circle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="step-label">
+          <span class="step-num">Paso 4</span>
+          <span class="step-text">Seleccionar cliente</span>
+        </div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-item" id="si5" data-step="5">
+        <div class="step-circle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <div class="step-label">
+          <span class="step-num">Paso 5</span>
+          <span class="step-text">Previsualizar carta</span>
+        </div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-item" id="si6" data-step="6">
+        <div class="step-circle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+        <div class="step-label">
+          <span class="step-num">Paso 6</span>
+          <span class="step-text">Generar PDF</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paso 1: Descargar formato -->
+    <section class="card" id="cardDownload">
+      <div class="card-header">
+        <div class="card-icon-wrap blue">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Paso 1 · Descargar formato base</h3>
+          <p>Descargue el formato Excel, diligencie los datos de cada cliente y guárdelo para cargarlo en el sistema.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="download-info" id="downloadInfoList">
+          <div class="download-info-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="dlInfoCols">14 columnas predefinidas</span></div>
+          <div class="download-info-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Fila de ejemplo incluida</span></div>
+          <div class="download-info-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="dlInfoFile">Formato_Cartas_Arenas_Inmobiliaria.xlsx</span></div>
+        </div>
+        <button class="btn-primary" id="btnDownloadTemplate">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar formato Excel
+        </button>
+      </div>
+    </section>
+
+    <!-- Paso 2: Cargar Excel -->
+    <section class="card" id="cardUpload">
+      <div class="card-header">
+        <div class="card-icon-wrap teal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Paso 2 · Cargar archivo Excel diligenciado</h3>
+          <p>Cargue el archivo Excel con los datos de los clientes. Solo se aceptan archivos .xlsx y .xls</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-zone-inner">
+            <div class="upload-icon-wrap">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+            <p class="upload-title">Arrastre su archivo Excel aquí</p>
+            <p class="upload-sub">o haga clic para seleccionarlo desde su computador</p>
+            <button class="btn-secondary" id="btnSelectFile">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              Seleccionar archivo
+            </button>
+            <p class="upload-hint">Formatos permitidos: .xlsx · .xls</p>
+          </div>
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
+        <div id="validationBox" class="validation-box" style="display:none;"></div>
+      </div>
+    </section>
+
+    <!-- Tarjeta archivo cargado -->
+    <div class="card file-card" id="fileCard" style="display:none;">
+      <div class="file-card-left">
+        <div class="file-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </div>
+        <div class="file-card-info">
+          <span class="file-card-name" id="fcName">—</span>
+          <div class="file-card-meta">
+            <span id="fcCount" class="fc-badge">0 clientes</span>
+            <span id="fcStatus" class="fc-badge fc-ok">Validado</span>
+            <span id="fcDate" class="fc-date">—</span>
+          </div>
+        </div>
+      </div>
+      <button class="btn-danger" id="btnClearFile">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        Eliminar archivo
+      </button>
+    </div>
+
+    <!-- Tabla de clientes -->
+    <section class="card" id="cardClients" style="display:none;">
+      <div class="card-header">
+        <div class="card-icon-wrap green">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="card-header-flex">
+          <div>
+            <h3>Clientes cargados</h3>
+            <p>Seleccione un cliente para previsualizar y generar su carta</p>
+          </div>
+          <div class="search-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchInput" placeholder="Buscar cliente…" class="search-input">
+          </div>
+        </div>
+      </div>
+      <div class="card-body no-pad">
+        <div class="table-wrap">
+          <table class="client-table" id="clientTable">
+            <thead>
+              <tr id="clientTableHead">
+                <th>#</th><th>Cliente</th><th>Dirección</th><th>Conjunto</th>
+                <th>Apto</th><th>Valor admón.</th><th>Retroactivo</th><th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="clientTableBody"></tbody>
+          </table>
+        </div>
+        <div id="clientCards" class="client-cards-wrap"></div>
+      </div>
+    </section>
+
+    <!-- Previsualización y PDF -->
+    <section class="card" id="cardPreview" style="display:none;">
+      <div class="card-header">
+        <div class="card-icon-wrap orange">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </div>
+        <div>
+          <h3>Previsualización de carta</h3>
+          <p>Revise el documento antes de generar el PDF</p>
+        </div>
+      </div>
+      <div class="card-body preview-body">
+        <div class="pdf-actions">
+          <button class="btn-pdf-main" id="btnPDF">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Generar PDF del cliente seleccionado
+          </button>
+          <button class="btn-pdf-sec" id="btnPDFAll">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+            PDF consolidado (todos)
+          </button>
+          <button class="btn-pdf-sec" id="btnPDFZip">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            Descargar todos en ZIP
+          </button>
+        </div>
+        <div class="letter-sheet-wrap">
+          <div class="letter-sheet" id="letterSheet">
+            <div class="letter-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <p>Seleccione un cliente de la tabla para ver la carta</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div><!-- /dashboardSection -->
+
+
+<!-- Loading overlay -->
+<div id="loadingOverlay" class="loading-overlay" style="display:none;">
+  <div class="loading-box">
+    <div class="loading-spinner"><div class="spinner-ring"></div></div>
+    <p class="loading-msg" id="loadingMsg">Procesando…</p>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="space-animation.js?v=20260613f"></script>
+<script src="app.js?v=20260613f"></script>
+</body>
+</html>
