@@ -1326,6 +1326,13 @@ html.dark .dash-banner { border-color: rgba(43,109,232,0.3); }
   box-shadow: 0 6px 28px rgba(217,119,6,0.38), 0 2px 8px rgba(217,119,6,0.2);
 }
 
+/* ── SP card: green active ── */
+.module-card.sp-card.active {
+  background: linear-gradient(135deg, #065F46 0%, #059669 100%);
+  border-color: rgba(5,150,105,0.45);
+  box-shadow: 0 6px 28px rgba(5,150,105,0.38), 0 2px 8px rgba(5,150,105,0.2);
+}
+
 /* Hover: inactive cards */
 .module-card.admin-card:not(.active):hover {
   border-color: #2B6DE8;
@@ -1337,22 +1344,30 @@ html.dark .dash-banner { border-color: rgba(43,109,232,0.3); }
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
+.module-card.sp-card:not(.active):hover {
+  border-color: #059669;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
 
 /* Text inside active cards */
 .module-card.admin-card.active .module-card-title,
-.module-card.desoc-card.active .module-card-title {
+.module-card.desoc-card.active .module-card-title,
+.module-card.sp-card.active .module-card-title {
   color: rgba(255,255,255,.97);
   transition: color 0.35s ease;
 }
 .module-card.admin-card.active .module-card-desc,
-.module-card.desoc-card.active .module-card-desc {
+.module-card.desoc-card.active .module-card-desc,
+.module-card.sp-card.active .module-card-desc {
   color: rgba(255,255,255,.72);
   transition: color 0.35s ease;
 }
 
 /* Icon inside active cards */
 .module-card.admin-card.active .module-card-icon,
-.module-card.desoc-card.active .module-card-icon {
+.module-card.desoc-card.active .module-card-icon,
+.module-card.sp-card.active .module-card-icon {
   background: rgba(255,255,255,.2) !important;
   color: #fff !important;
   transition: background 0.35s ease, color 0.35s ease;
@@ -1371,6 +1386,7 @@ html.dark .dash-banner { border-color: rgba(43,109,232,0.3); }
 .module-card:hover .module-card-icon { transform: scale(1.08); }
 .module-card-icon.blue   { background: var(--c-blue-l); color: var(--c-blue); }
 .module-card-icon.orange { background: var(--c-orange-l); color: var(--c-orange); }
+.module-card-icon.green  { background: var(--c-green-l); color: var(--c-green); }
 
 .module-card-content {
   display: flex;
@@ -1512,6 +1528,77 @@ html.dark .dash-mode-desoc .dash-banner {
   animation: bannerGrad 14s ease infinite;
 }
 
+/* ══════════════════════════════════════════════════════════
+   DASHBOARD THEME — SERVICIOS PÚBLICOS (green palette)
+══════════════════════════════════════════════════════════ */
+
+/* Stepper active dot */
+.dash-mode-sp .step-item.active .step-circle {
+  background: #059669;
+  border-color: #059669;
+  box-shadow: 0 0 0 5px rgba(5,150,105,.15), 0 4px 12px rgba(5,150,105,.3);
+}
+.dash-mode-sp .step-item.active .step-num { color: #059669; }
+
+/* PDF action buttons */
+.dash-mode-sp .btn-pdf-main {
+  background: linear-gradient(135deg, #065F46, #059669);
+  box-shadow: 0 4px 16px rgba(5,150,105,.3);
+}
+.dash-mode-sp .btn-pdf-main:hover {
+  box-shadow: 0 8px 28px rgba(5,150,105,.45);
+}
+
+/* File upload card accent */
+.dash-mode-sp .file-card {
+  border-left-color: #059669;
+}
+
+/* Client row select */
+.dash-mode-sp .btn-select-client:hover {
+  color: #065F46;
+}
+.dash-mode-sp .btn-select-client.selected-btn {
+  background: #059669;
+}
+
+/* Table selected row */
+.dash-mode-sp .client-table tbody tr.selected {
+  background: #ECFDF5;
+}
+
+/* Card header tint */
+.dash-mode-sp .card-header {
+  background: linear-gradient(135deg, var(--c-surface) 60%, #F0FDF4 100%);
+}
+
+/* Active pill in sp mode */
+.dash-mode-sp .module-active-pill {
+  background: #059669;
+}
+
+/* Banner green tint */
+.dash-mode-sp .dash-banner {
+  background: linear-gradient(-50deg, #001A0E, #012E18, #034A26, #001A0E, #023D20, #001A0E);
+  background-size: 400% 400%;
+  animation: bannerGrad 14s ease infinite, slideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.08s both;
+}
+
+/* Dark mode overrides for sp theme */
+html.dark .dash-mode-sp .step-item.active .step-circle {
+  background: #059669; border-color: #059669;
+  box-shadow: 0 0 0 5px rgba(5,150,105,.2), 0 4px 14px rgba(5,150,105,.35);
+}
+html.dark .dash-mode-sp .card-header {
+  background: linear-gradient(135deg, var(--c-surface) 60%, #021A0C 100%);
+}
+html.dark .dash-mode-sp .client-table tbody tr.selected { background: #021A0C; }
+html.dark .dash-mode-sp .dash-banner {
+  background: linear-gradient(-50deg, #001208, #02200E, #043016, #001208, #032A12, #001208);
+  background-size: 400% 400%;
+  animation: bannerGrad 14s ease infinite;
+}
+
 /* Dark mode base cards */
 html.dark .module-card { background: #0F1828; border-color: #1A2A44; }
 html.dark .module-card.admin-card.active {
@@ -1522,10 +1609,16 @@ html.dark .module-card.desoc-card.active {
   background: linear-gradient(135deg, #6B2A00 0%, #A85D00 100%);
   border-color: rgba(217,119,6,0.5);
 }
+html.dark .module-card.sp-card.active {
+  background: linear-gradient(135deg, #033D28 0%, #056B48 100%);
+  border-color: rgba(5,150,105,0.5);
+}
 html.dark .module-card.admin-card:not(.active):hover { border-color: #2B6DE8; }
 html.dark .module-card.desoc-card:not(.active):hover { border-color: #D97706; }
+html.dark .module-card.sp-card:not(.active):hover   { border-color: #059669; }
 html.dark .module-card-icon.blue   { background: var(--c-blue-l); }
 html.dark .module-card-icon.orange { background: var(--c-orange-l); }
+html.dark .module-card-icon.green  { background: var(--c-green-l); }
 
 @media (max-width: 640px) {
   .module-card { padding: .9rem 1rem; }
@@ -1740,6 +1833,7 @@ html.dark .module-card-icon.orange { background: var(--c-orange-l); }
 
 /* Upload zone */
 .upload-zone {
+  position: relative;
   border: 2px dashed var(--c-border-2);
   border-radius: var(--radius-lg);
   cursor: pointer;
@@ -1778,6 +1872,94 @@ html.dark .module-card-icon.orange { background: var(--c-orange-l); }
 .upload-title { font-size: 1rem; font-weight: 700; color: var(--c-text); }
 .upload-sub { font-size: .85rem; color: var(--c-text-2); }
 .upload-hint { font-size: .78rem; color: var(--c-text-3); margin-top: .3rem; }
+
+/* ── Upload success overlay ── */
+.upload-zone.upload-success {
+  border-color: var(--c-green);
+  border-style: solid;
+}
+
+@keyframes uOverlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes uOverlayOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(1.03); }
+}
+@keyframes uRingPulse {
+  0%   { transform: scale(0.6); opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+@keyframes uCheckPop {
+  0%   { transform: scale(0);    opacity: 0; }
+  55%  { transform: scale(1.18); opacity: 1; }
+  75%  { transform: scale(0.93); }
+  100% { transform: scale(1);    opacity: 1; }
+}
+@keyframes uLabelFade {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.upload-success-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  background: var(--c-green-l);
+  border-radius: inherit;
+  z-index: 6;
+  cursor: pointer;
+  animation: uOverlayIn 0.25s ease both;
+}
+.upload-success-overlay.out {
+  animation: uOverlayOut 0.35s ease both;
+}
+
+.upload-success-icon-wrap {
+  position: relative;
+  width: 80px; height: 80px;
+  display: flex; align-items: center; justify-content: center;
+}
+.upload-success-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2.5px solid var(--c-green);
+  animation: uRingPulse 0.9s ease-out both;
+}
+.upload-success-ring:nth-child(2) { animation-delay: 0.18s; }
+
+.upload-success-circle {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: var(--c-green);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 28px rgba(5,150,105,.35);
+  animation: uCheckPop 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.05s both;
+}
+.upload-success-label {
+  font-size: .95rem; font-weight: 700; color: var(--c-green);
+  animation: uLabelFade 0.38s ease 0.3s both;
+}
+.upload-success-count {
+  font-size: .8rem; color: var(--c-text-2);
+  animation: uLabelFade 0.38s ease 0.4s both;
+}
+.upload-success-hint {
+  font-size: .75rem; color: var(--c-green); font-weight: 600;
+  letter-spacing: .04em; opacity: .75;
+  animation: uLabelFade 0.38s ease 0.55s both;
+}
+
+html.dark .upload-success-overlay { background: #082818; }
+html.dark .upload-success-label   { color: #34d399; }
+html.dark .upload-success-ring    { border-color: #34d399; }
+html.dark .upload-success-circle  { background: #059669; }
 
 /* Validation box */
 .validation-box {

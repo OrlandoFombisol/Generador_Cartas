@@ -15,7 +15,7 @@ const APP = {
   logoAspect: 0.28,
   membreteBytes: null,   /* bytes del PDF membrete plantilla */
   currentStep: 1,
-  moduleType: 'admin'   /* 'admin' | 'desoc' */
+  moduleType: 'admin'   /* 'admin' | 'desoc' | 'sp' */
 };
 
 const REQUIRED_COLS = [
@@ -29,6 +29,13 @@ const DESOC_COLS = [
   'fecha_carta','nombre_cliente','direccion_cliente','ciudad',
   'direccion_inmueble','motivo_incumplimiento',
   'valor_deuda_numero','valor_deuda_letras','fecha_limite_entrega'
+];
+
+const SP_COLS = [
+  'fecha_carta','ciudad','nombre_cliente','cedula','direccion_inmueble','valor_total',
+  'servicio_1','contrato_1','valor_1',
+  'servicio_2','contrato_2','valor_2',
+  'servicio_3','contrato_3','valor_3'
 ];
 
 /* ══════════════════════════════════════════════════════════
@@ -113,6 +120,7 @@ function bindEvents() {
   /* Selector de módulo */
   document.getElementById('btnModuleAdmin').addEventListener('click', () => switchModule('admin'));
   document.getElementById('btnModuleDesoc').addEventListener('click', () => switchModule('desoc'));
+  document.getElementById('btnModuleSP').addEventListener('click', () => switchModule('sp'));
 
   /* Arte SVG en tarjetas de módulo */
   applyModuleCardArt();
@@ -333,6 +341,7 @@ function setStep(n) {
 
 function downloadTemplate() {
   if (APP.moduleType === 'desoc') { downloadTemplateDesoc(); return; }
+  if (APP.moduleType === 'sp')    { downloadTemplateSP();    return; }
 
   const headers = [
     'fecha_carta','nombre_cliente','direccion','ciudad','asunto',
@@ -404,8 +413,8 @@ function processFile(file) {
       const ws = wb.Sheets[sheetName];
       const raw = XLSX.utils.sheet_to_json(ws, { defval: '', raw: false });
 
-      const validation = APP.moduleType === 'desoc'
-        ? validateDataDesoc(raw, file.name)
+      const validation = APP.moduleType === 'desoc' ? validateDataDesoc(raw, file.name)
+        : APP.moduleType === 'sp' ? validateDataSP(raw, file.name)
         : validateData(raw, file.name);
       hideLoading();
 
@@ -417,6 +426,7 @@ function processFile(file) {
         renderClients(APP.clients);
         showToast(`${APP.clients.length} cliente(s) cargados correctamente.`, 'success');
         setStep(3);
+        animateUploadSuccess(APP.clients.length, file.name);
       } else {
         showValidation(validation.message, 'error', validation.list);
       }
@@ -519,6 +529,7 @@ function clearFile(silent) {
 
 function renderClients(list) {
   if (APP.moduleType === 'desoc') { renderClientsDesoc(list); return; }
+  if (APP.moduleType === 'sp')    { renderClientsSP(list);    return; }
   const tbody = document.getElementById('clientTableBody');
   const cardsWrap = document.getElementById('clientCards');
 
@@ -586,6 +597,10 @@ function handleSearch(e) {
       return (c.nombre_cliente + c.direccion_cliente + c.direccion_inmueble + c.ciudad)
         .toLowerCase().includes(q);
     }
+    if (APP.moduleType === 'sp') {
+      return (c.nombre_cliente + c.cedula + c.direccion_inmueble + c.ciudad)
+        .toLowerCase().includes(q);
+    }
     return (c.nombre_cliente + c.direccion + c.conjunto + c.apartamento + c.ciudad)
       .toLowerCase().includes(q);
   });
@@ -629,6 +644,8 @@ function selectClient(client) {
 
   if (APP.moduleType === 'desoc') {
     renderLetterPreviewDesoc(client);
+  } else if (APP.moduleType === 'sp') {
+    renderLetterPreviewSP(client);
   } else {
     renderLetterPreview(client);
   }
@@ -663,24 +680,24 @@ function renderLetterPreview(c) {
       <!-- Contenido de la carta -->
       <div style="
         position:absolute;
-        top:18.3%; left:11.6%; right:9.3%;
+        top:18.3%; left:11.6%; right:12%;
         font-family:Arial,Helvetica,sans-serif;
-        font-size:1.55cqw;
+        font-size:1.8cqw;
         color:#000;
         line-height:1.55;
       ">
-        <p style="margin:0 0 .6em 0">${esc(c.fecha_carta)}</p>
+        <p style="margin:0 0 1em 0">${esc(c.fecha_carta)}</p>
 
         <p style="margin:0">Señor(a)(es)</p>
         <p style="margin:0;font-weight:700">${esc(c.nombre_cliente)}</p>
         <p style="margin:0">${esc(c.direccion)}</p>
-        <p style="margin:0 0 .6em 0">${esc(c.ciudad)}</p>
+        <p style="margin:0 0 0.75em 0">${esc(c.ciudad)}</p>
 
-        <p style="margin:0 0 2.5em 0;font-weight:700">Asunto: ${esc(c.asunto)}</p>
+        <p style="margin:0 0 5.4em 0;font-weight:700">Asunto: ${esc(c.asunto)}</p>
 
-        <p style="margin:0 0 .6em 0">Cordial saludo,</p>
+        <p style="margin:0 0 0.75em 0">Cordial saludo,</p>
 
-        <p style="margin:0 0 .5em 0;text-align:justify">
+        <p style="margin:0 0 1.8em 0;text-align:justify">
           De acuerdo a información recibida por parte de la administración del
           <strong>${esc(c.conjunto)}</strong>, se acordó un incremento de la expensa del
           apartamento que actualmente se encuentra ocupando. Quedando en
@@ -688,7 +705,7 @@ function renderLetterPreview(c) {
           (<strong>${esc(c.valor_admon_numero)}</strong>).
         </p>
 
-        <p style="margin:0 0 .7em 0;text-align:justify">
+        <p style="margin:0 0 2.3em 0;text-align:justify">
           Por tal motivo, en su factura de arriendo correspondiente al mes de
           <strong>${esc(c.mes_factura)}</strong> observará el cobro
           RETROACTIVOS DE <strong>${esc(c.periodo_retroactivo)}</strong> por
@@ -697,12 +714,12 @@ function renderLetterPreview(c) {
           <strong>${esc(c.empresa_factura)}</strong>.
         </p>
 
-        <p style="margin:0 0 .25em 0;font-weight:700;font-size:.9em">PUEDE CANCELAR POR MEDIO DE ESTE LINK:</p>
-        <p style="margin:0 0 4.3em 0;word-break:break-all;font-size:.9em">
+        <p style="margin:0;font-weight:700;font-size:.9em">PUEDE CANCELAR POR MEDIO DE ESTE LINK:</p>
+        <p style="margin:0 0 9.8em 0;word-break:break-all;font-size:.9em">
           <a href="${esc(c.link_pago)}" target="_blank" rel="noopener" style="color:#000">${esc(c.link_pago)}</a>
         </p>
 
-        <p style="margin:0 0 1.8em 0">Atentamente,</p>
+        <p style="margin:0 0 3.1em 0">Atentamente,</p>
         <p style="margin:0;font-weight:700">Dpto. de Cartera</p>
       </div>
     </div>`;
@@ -1089,6 +1106,7 @@ function esc(str) {
 /* ── PDF individual ── */
 async function generatePDFSingle() {
   if (APP.moduleType === 'desoc') { await generatePDFSingleDesoc(); return; }
+  if (APP.moduleType === 'sp')    { await generatePDFSingleSP();    return; }
   if (!APP.selectedClient) {
     showToast('Seleccione un cliente para generar el PDF.', 'warning');
     return;
@@ -1114,6 +1132,7 @@ async function generatePDFSingle() {
 /* ── PDF consolidado (todas las cartas en un solo PDF) ── */
 async function generatePDFConsolidated() {
   if (APP.moduleType === 'desoc') { await generatePDFConsolidatedDesoc(); return; }
+  if (APP.moduleType === 'sp')    { await generatePDFConsolidatedSP();    return; }
   if (APP.clients.length === 0) {
     showToast('No hay clientes cargados para generar el PDF consolidado.', 'warning');
     return;
@@ -1233,6 +1252,7 @@ function buildPageInDoc(doc, client) {
 /* ── Generar todos como ZIP ── */
 async function generatePDFZip() {
   if (APP.moduleType === 'desoc') { await generatePDFZipDesoc(); return; }
+  if (APP.moduleType === 'sp')    { await generatePDFZipSP();    return; }
   if (APP.clients.length === 0) {
     showToast('No hay clientes cargados para generar los PDF.', 'warning');
     return;
@@ -1281,6 +1301,39 @@ async function generatePDFZip() {
 /* ══════════════════════════════════════════════════════════
    HELPERS UI
 ══════════════════════════════════════════════════════════ */
+
+/* Animación de éxito en la zona de carga */
+function animateUploadSuccess(count, filename) {
+  const zone = document.getElementById('uploadZone');
+  zone.classList.add('upload-success');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'upload-success-overlay';
+  overlay.innerHTML = `
+    <div class="upload-success-icon-wrap">
+      <div class="upload-success-ring"></div>
+      <div class="upload-success-ring"></div>
+      <div class="upload-success-circle">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"
+             stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+    </div>
+    <p class="upload-success-label">¡Archivo cargado correctamente!</p>
+    <p class="upload-success-count">${count} cliente(s) &middot; ${esc(filename)}</p>
+    <p class="upload-success-hint">Clic para cerrar</p>`;
+  zone.appendChild(overlay);
+
+  overlay.addEventListener('click', (e) => {
+    e.stopPropagation();
+    overlay.classList.add('out');
+    setTimeout(() => {
+      overlay.remove();
+      zone.classList.remove('upload-success');
+    }, 350);
+  }, { once: true });
+}
 
 function showLoading(msg) {
   document.getElementById('loadingMsg').textContent = msg || 'Procesando…';
@@ -1370,17 +1423,23 @@ function switchModule(type) {
   /* Actualizar botones de selección */
   const btnAdmin = document.getElementById('btnModuleAdmin');
   const btnDesoc = document.getElementById('btnModuleDesoc');
+  const btnSP    = document.getElementById('btnModuleSP');
   btnAdmin.classList.toggle('active', type === 'admin');
   btnDesoc.classList.toggle('active', type === 'desoc');
+  btnSP.classList.toggle('active',    type === 'sp');
   document.getElementById('pillAdmin').style.display = type === 'admin' ? '' : 'none';
   document.getElementById('pillDesoc').style.display = type === 'desoc' ? '' : 'none';
+  document.getElementById('pillSP').style.display    = type === 'sp'    ? '' : 'none';
 
   /* Tema de color del dashboard */
   const dash = document.getElementById('dashboardSection');
-  if (dash) dash.classList.toggle('dash-mode-desoc', type === 'desoc');
+  if (dash) {
+    dash.classList.toggle('dash-mode-desoc', type === 'desoc');
+    dash.classList.toggle('dash-mode-sp',    type === 'sp');
+  }
 
   /* Animar la tarjeta recién activada */
-  const newCard = type === 'desoc' ? btnDesoc : btnAdmin;
+  const newCard = type === 'desoc' ? btnDesoc : type === 'sp' ? btnSP : btnAdmin;
   newCard.classList.remove('just-activated');
   void newCard.offsetWidth;
   newCard.classList.add('just-activated');
@@ -1393,6 +1452,9 @@ function switchModule(type) {
   if (type === 'desoc') {
     document.getElementById('dlInfoCols').textContent = '9 columnas predefinidas';
     document.getElementById('dlInfoFile').textContent = 'Formato_Cartas_Desocupacion_Arenas.xlsx';
+  } else if (type === 'sp') {
+    document.getElementById('dlInfoCols').textContent = '15 columnas predefinidas';
+    document.getElementById('dlInfoFile').textContent = 'Formato_Servicios_Publicos_Arenas.xlsx';
   } else {
     document.getElementById('dlInfoCols').textContent = '14 columnas predefinidas';
     document.getElementById('dlInfoFile').textContent = 'Formato_Cartas_Arenas_Inmobiliaria.xlsx';
@@ -1401,24 +1463,31 @@ function switchModule(type) {
   /* Actualizar encabezados de tabla */
   const head = document.getElementById('clientTableHead');
   if (head) {
-    head.innerHTML = type === 'desoc'
-      ? '<th>#</th><th>Cliente</th><th>Dirección</th><th>Inmueble</th><th>Ciudad</th><th>Deuda</th><th>Fecha límite</th><th>Acción</th>'
-      : '<th>#</th><th>Cliente</th><th>Dirección</th><th>Conjunto</th><th>Apto</th><th>Valor admón.</th><th>Retroactivo</th><th>Acción</th>';
+    if (type === 'desoc') {
+      head.innerHTML = '<th>#</th><th>Cliente</th><th>Dirección</th><th>Inmueble</th><th>Ciudad</th><th>Deuda</th><th>Fecha límite</th><th>Acción</th>';
+    } else if (type === 'sp') {
+      head.innerHTML = '<th>#</th><th>Cliente</th><th>Cédula</th><th>Inmueble</th><th>Ciudad</th><th>Total SP</th><th>Acción</th>';
+    } else {
+      head.innerHTML = '<th>#</th><th>Cliente</th><th>Dirección</th><th>Conjunto</th><th>Apto</th><th>Valor admón.</th><th>Retroactivo</th><th>Acción</th>';
+    }
   }
 
   /* Limpiar estado y UI */
   clearFile(true);
-  showToast(type === 'desoc'
-    ? 'Módulo: Cartas de Desocupación activado.'
-    : 'Módulo: Cartas de Administración activado.', 'info');
+  const msgs = {
+    admin: 'Módulo: Cartas de Administración activado.',
+    desoc: 'Módulo: Cartas de Desocupación activado.',
+    sp:    'Módulo: Requerimiento de Servicios Públicos activado.'
+  };
+  showToast(msgs[type] || msgs.admin, 'info');
 }
 
 /* ── Flash de color al cambiar de módulo ── */
 function animateModuleSwitch(type) {
   const selector = document.querySelector('.module-selector');
   if (!selector) return;
-  const color = type === 'desoc'
-    ? 'rgba(217,119,6,.18)'
+  const color = type === 'desoc' ? 'rgba(217,119,6,.18)'
+    : type === 'sp' ? 'rgba(5,150,105,.18)'
     : 'rgba(43,109,232,.18)';
   const el = document.createElement('div');
   el.style.cssText = [
@@ -1499,6 +1568,34 @@ function applyModuleCardArt() {
     <polyline points="148,14 162,22 148,30" fill="none" stroke="rgba(255,255,255,.34)" stroke-width="2" stroke-linejoin="round"/>
   </svg>`;
 
+  /* Rayo / servicios públicos — verde tenue (inactivo) */
+  const spLight = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 140">
+    <circle cx="140" cy="30" r="22" fill="rgba(5,150,105,.03)" stroke="rgba(5,150,105,.07)" stroke-width="1.2"/>
+    <circle cx="140" cy="30" r="14" fill="rgba(5,150,105,.04)" stroke="rgba(5,150,105,.08)" stroke-width="1"/>
+    <polygon points="140,16 147,27 133,27" fill="rgba(5,150,105,.12)" stroke="rgba(5,150,105,.15)" stroke-width="1"/>
+    <path d="M96,20 L72,68 L90,68 L66,120 L120,60 L100,60 Z" fill="rgba(5,150,105,.06)" stroke="rgba(5,150,105,.12)" stroke-width="1.5" stroke-linejoin="round"/>
+    <line x1="24" y1="50" x2="50" y2="50" stroke="rgba(5,150,105,.1)" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <line x1="20" y1="70" x2="55" y2="70" stroke="rgba(5,150,105,.08)" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <line x1="28" y1="90" x2="48" y2="90" stroke="rgba(5,150,105,.07)" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <circle cx="30" cy="115" r="6" fill="rgba(5,150,105,.04)" stroke="rgba(5,150,105,.1)" stroke-width="1"/>
+    <circle cx="50" cy="115" r="6" fill="rgba(5,150,105,.04)" stroke="rgba(5,150,105,.1)" stroke-width="1"/>
+    <line x1="36" y1="115" x2="44" y2="115" stroke="rgba(5,150,105,.1)" stroke-width="1.5"/>
+  </svg>`;
+
+  /* Rayo / servicios públicos — blanco (activo sobre verde) */
+  const spDark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 140">
+    <circle cx="140" cy="30" r="22" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.12)" stroke-width="1.2"/>
+    <circle cx="140" cy="30" r="14" fill="rgba(255,255,255,.07)" stroke="rgba(255,255,255,.14)" stroke-width="1"/>
+    <polygon points="140,16 147,27 133,27" fill="rgba(255,255,255,.22)" stroke="rgba(255,255,255,.28)" stroke-width="1"/>
+    <path d="M96,20 L72,68 L90,68 L66,120 L120,60 L100,60 Z" fill="rgba(255,255,255,.12)" stroke="rgba(255,255,255,.22)" stroke-width="1.5" stroke-linejoin="round"/>
+    <line x1="24" y1="50" x2="50" y2="50" stroke="rgba(255,255,255,.18)" stroke-width="1.5" stroke-dasharray="4,3"/>
+    <line x1="20" y1="70" x2="55" y2="70" stroke="rgba(255,255,255,.14)" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <line x1="28" y1="90" x2="48" y2="90" stroke="rgba(255,255,255,.12)" stroke-width="1.2" stroke-dasharray="4,3"/>
+    <circle cx="30" cy="115" r="6" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.18)" stroke-width="1"/>
+    <circle cx="50" cy="115" r="6" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.18)" stroke-width="1"/>
+    <line x1="36" y1="115" x2="44" y2="115" stroke="rgba(255,255,255,.22)" stroke-width="1.5"/>
+  </svg>`;
+
   function uri(svg) {
     return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
   }
@@ -1510,6 +1607,8 @@ function applyModuleCardArt() {
     .module-card.admin-card::after  { background-image: ${uri(adminDark)}; }
     .module-card.desoc-card::before { background-image: ${uri(desocLight)}; }
     .module-card.desoc-card::after  { background-image: ${uri(desocDark)}; }
+    .module-card.sp-card::before    { background-image: ${uri(spLight)}; }
+    .module-card.sp-card::after     { background-image: ${uri(spDark)}; }
   `;
   document.head.appendChild(style);
 }
@@ -1648,7 +1747,7 @@ function renderLetterPreviewDesoc(c) {
    */
   const PAGE  = 'position:relative;width:100%;padding-top:129.4%;overflow:hidden;border-radius:4px;box-shadow:0 3px 18px rgba(0,0,0,.18);background:#fff;';
   const IMG   = 'position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;';
-  const TEXT  = 'position:absolute;top:18.3%;left:11.6%;right:12%;font-family:Arial,Helvetica,sans-serif;font-size:1.72cqw;color:#000;line-height:1.52;';
+  const TEXT  = 'position:absolute;top:18.3%;left:11.6%;right:12%;font-family:Arial,Helvetica,sans-serif;font-size:1.72cqw;color:#000;line-height:1.62;';
 
   /* Encabezado */
   const PH   = 'margin:0 0 1.9em 0;';                                    // skip(7) = 1.89em
@@ -2060,6 +2159,542 @@ function buildPDFDesocFallback(client) {
   buildDesocPageInDoc(doc, client);
   return doc;
 }
+
+/* ══════════════════════════════════════════════════════════
+   MÓDULO: REQUERIMIENTO DE SERVICIOS PÚBLICOS
+══════════════════════════════════════════════════════════ */
+
+/* ── Descarga del formato Excel SP ── */
+function downloadTemplateSP() {
+  const example = [
+    'Barranquilla, 21 de junio de 2026',
+    'Barranquilla',
+    'GALVAN GARCIA CRISTIAN DAVID',
+    '1.063.151.881',
+    'Calle 2 # 54-35 Piso 3 ED MIRADOR DEL MAR',
+    '$3.595.715',
+    'Energía', '1161936', '$1.774.240',
+    'Agua',    '500363',  '$1.589.208',
+    'Gas',     '249206',  '$232.267'
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([SP_COLS, example]);
+
+  ws['!cols'] = [
+    {wch:35},{wch:20},{wch:35},{wch:18},{wch:45},{wch:18},
+    {wch:14},{wch:18},{wch:18},
+    {wch:14},{wch:18},{wch:18},
+    {wch:14},{wch:18},{wch:18}
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'ServiciosPublicos');
+  XLSX.writeFile(wb, 'Formato_Servicios_Publicos_Arenas.xlsx');
+
+  showToast('Formato Excel de servicios públicos descargado correctamente.', 'success');
+  setStep(2);
+}
+
+/* ── Validación del Excel SP ── */
+function validateDataSP(raw, fileName) {
+  if (!raw || raw.length === 0) {
+    return { ok: false, message: 'No se encontraron registros en el archivo cargado.' };
+  }
+
+  const headers = Object.keys(raw[0]).map(h => h.trim().toLowerCase().replace(/\s+/g,'_'));
+  const missing = SP_COLS.filter(c => !headers.includes(c));
+
+  if (missing.length > 0) {
+    return { ok: false, message: 'Faltan las siguientes columnas obligatorias:', list: missing };
+  }
+
+  const clients = raw.map((row, i) => {
+    const normalized = {};
+    Object.keys(row).forEach(k => {
+      normalized[k.trim().toLowerCase().replace(/\s+/g,'_')] = String(row[k] ?? '').trim();
+    });
+    normalized._index = i;
+    return normalized;
+  });
+
+  const valid = clients.filter(c => c.nombre_cliente && c.nombre_cliente.length > 0);
+
+  if (valid.length === 0) {
+    return { ok: false, message: 'No se encontraron registros con nombre_cliente diligenciado.' };
+  }
+
+  return { ok: true, clients: valid };
+}
+
+/* ── Tabla de clientes SP ── */
+function renderClientsSP(list) {
+  const tbody = document.getElementById('clientTableBody');
+  const cardsWrap = document.getElementById('clientCards');
+
+  tbody.innerHTML = '';
+  cardsWrap.innerHTML = '';
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="table-empty">No se encontraron registros con ese criterio.</td></tr>`;
+    cardsWrap.innerHTML = `<p class="table-empty">No se encontraron registros.</p>`;
+    return;
+  }
+
+  list.forEach((c) => {
+    const isSelected = APP.selectedIndex === c._index;
+
+    const tr = document.createElement('tr');
+    tr.dataset.idx = c._index;
+    if (isSelected) tr.classList.add('selected');
+    tr.innerHTML = `
+      <td>${c._index + 1}</td>
+      <td><strong>${esc(c.nombre_cliente)}</strong></td>
+      <td>${esc(c.cedula)}</td>
+      <td>${esc(c.direccion_inmueble)}</td>
+      <td>${esc(c.ciudad)}</td>
+      <td>${esc(c.valor_total)}</td>
+      <td>
+        <button class="btn-select-client${isSelected ? ' selected-btn' : ''}" data-idx="${c._index}">
+          ${isSelected ? '✓ Seleccionado' : 'Ver carta'}
+        </button>
+      </td>`;
+    tr.querySelector('.btn-select-client').addEventListener('click', () => selectClient(c));
+    tbody.appendChild(tr);
+
+    const div = document.createElement('div');
+    div.className = `client-card${isSelected ? ' selected' : ''}`;
+    div.dataset.idx = c._index;
+    div.innerHTML = `
+      <div class="client-card-name">${esc(c.nombre_cliente)}</div>
+      <div class="client-card-row"><span>Cédula</span><span>${esc(c.cedula)}</span></div>
+      <div class="client-card-row"><span>Inmueble</span><span>${esc(c.direccion_inmueble)}</span></div>
+      <div class="client-card-row"><span>Ciudad</span><span>${esc(c.ciudad)}</span></div>
+      <div class="client-card-row"><span>Total SP</span><span>${esc(c.valor_total)}</span></div>
+      <div class="client-card-actions">
+        <button class="btn-select-client${isSelected ? ' selected-btn' : ''}" style="width:100%;justify-content:center;" data-idx="${c._index}">
+          ${isSelected ? '✓ Seleccionado' : 'Ver carta'}
+        </button>
+      </div>`;
+    div.querySelector('.btn-select-client').addEventListener('click', () => selectClient(c));
+    cardsWrap.appendChild(div);
+  });
+
+  document.getElementById('cardClients').style.display = 'block';
+  document.getElementById('cardPreview').style.display = 'block';
+}
+
+/* ── Previsualización SP ── */
+function renderLetterPreviewSP(c) {
+  const PAGE = 'position:relative;width:100%;padding-top:129.4%;overflow:hidden;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.15);';
+  const IMG  = 'position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;';
+  const TEXT = 'position:absolute;top:14.7%;left:11.6%;right:12%;font-family:Arial,Helvetica,sans-serif;font-size:1.8cqw;color:#000;line-height:1.55;';
+
+  /* Tabla de servicios */
+  const row = (s, con, val) => s
+    ? `<tr style="border-bottom:1px solid #e2e8f0;">
+        <td style="padding:.18em .5em;text-align:center;font-weight:600">${esc(s)}</td>
+        <td style="padding:.18em .5em;text-align:center">${esc(con)}</td>
+        <td style="padding:.18em .5em;text-align:center">${esc(val)}</td>
+       </tr>`
+    : '';
+
+  const tableRows = [
+    row(c.servicio_1, c.contrato_1, c.valor_1),
+    row(c.servicio_2, c.contrato_2, c.valor_2),
+    row(c.servicio_3, c.contrato_3, c.valor_3)
+  ].join('');
+
+  const html = `<div style="${PAGE}">
+    <img src="assets/membrete_preview.png" style="${IMG}" alt="Membrete">
+    <div style="${TEXT}">
+      <p style="margin:0">${esc(c.fecha_carta)}</p>
+
+      <p style="margin:0">Señor(a)</p>
+      <p style="margin:0;font-weight:700">${esc(c.nombre_cliente)}</p>
+      <p style="margin:0">C.C. No ${esc(c.cedula)}</p>
+      <p style="margin:0 0 1.8em 0">Ref.: Cobro de servicios públicos pendientes del inmueble ubicado en <strong>${esc(c.direccion_inmueble)}</strong></p>
+
+      <p style="margin:0 0 0.75em 0">Cordial saludo.</p>
+
+      <p style="margin:0 0 0.75em 0;text-align:justify">
+        Por medio de la presente nos permitimos requerir formalmente el pago de los servicios públicos domiciliarios pendientes correspondientes al inmueble citado en referencia, obligación que, de conformidad con el contrato de arrendamiento suscrito, se encuentra a su cargo como arrendatario.
+      </p>
+
+      <p style="margin:0 0 1.8em 0;text-align:justify">
+        Una vez revisado el estado de cuenta del inmueble, se evidencia un saldo pendiente por concepto de servicios públicos por valor de <strong>${esc(c.valor_total)}</strong>, discriminado de acuerdo con las facturas emitidas por las respectivas empresas prestadoras del servicio.
+      </p>
+
+      <table style="width:100%;border-collapse:collapse;font-size:.9em;margin-bottom:.75em;border-top:1.5px solid #334155;">
+        <thead>
+          <tr style="background:rgba(5,150,105,.08);">
+            <th style="padding:.22em .5em;text-align:center;font-weight:700">Servicios Públicos</th>
+            <th style="padding:.22em .5em;text-align:center;font-weight:700">Contrato / Póliza</th>
+            <th style="padding:.22em .5em;text-align:center;font-weight:700">Valor</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+
+      <p style="margin:0 0 1.8em 0;text-align:justify">
+        Le solicitamos realizar el pago de esta obligación dentro de los cinco (5) días hábiles siguientes al recibo de la presente comunicación y remitir el respectivo soporte.
+      </p>
+
+      <p style="margin:0 0 1.8em 0;text-align:justify">
+        Es importante señalar que el incumplimiento de esta obligación genera perjuicios al inmueble y a su propietario, pudiendo dar lugar al inicio de las acciones de cobro pre jurídico y jurídico a que haya lugar, así como al cobro de intereses, costos y gastos derivados de la recuperación de la cartera.
+      </p>
+
+      <p style="margin:0 0 1.55em 0;text-align:justify">
+        Agradecemos su pronta atención y cumplimiento de esta obligación.
+      </p>
+
+      <p style="margin:0 0 3.1em 0">Atentamente,</p>
+      <p style="margin:0;font-weight:700">GRUPO ARENAS S.A.S.<br>Área de Cartera y Cobranza</p>
+    </div>
+  </div>`;
+
+  const sheet = document.getElementById('letterSheet');
+  sheet.style.opacity = '0';
+  sheet.style.transform = 'translateY(10px)';
+  sheet.style.padding = '0';
+  sheet.style.background = 'none';
+  sheet.innerHTML = html;
+  requestAnimationFrame(() => {
+    sheet.style.transition = 'opacity .35s ease, transform .35s ease';
+    sheet.style.opacity = '1';
+    sheet.style.transform = 'translateY(0)';
+  });
+}
+
+/* ── PDF SP con membrete ── */
+async function buildPDFSPWithTemplate(client) {
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const MM = 2.835;
+  const ML = 25 * MM;
+  const CW = 165 * MM;
+  const SZ = 11;
+  const LS = 6 * MM;
+
+  const templateDoc = await PDFDocument.load(APP.membreteBytes, { ignoreEncryption: true });
+  const { width: PW, height: PH } = templateDoc.getPage(0).getSize();
+
+  const pdfDoc = await PDFDocument.create();
+  const [embMem] = await pdfDoc.embedPdf(templateDoc, [0]);
+  const page = pdfDoc.addPage([PW, PH]);
+  page.drawPage(embMem, { x: 0, y: 0, width: PW, height: PH });
+
+  const fN = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const cMain = rgb(0, 0, 0);
+
+  let y = PH - 41 * MM;
+
+  /* ── Fecha ── */
+  page.drawText(v(client.fecha_carta), { x: ML, y, size: SZ, font: fN, color: cMain });
+  y -= LS;
+
+  /* ── Destinatario ── */
+  page.drawText('Señor(a)', { x: ML, y, size: SZ, font: fN, color: cMain });
+  y -= LS;
+  page.drawText(v(client.nombre_cliente).toUpperCase(), { x: ML, y, size: SZ, font: fB, color: cMain });
+  y -= LS;
+  page.drawText('C.C. No ' + v(client.cedula), { x: ML, y, size: SZ, font: fN, color: cMain });
+  y -= LS;
+
+  libWrap('Ref.: Cobro de servicios públicos pendientes del inmueble ubicado en ' + v(client.direccion_inmueble), CW, fN, SZ)
+    .forEach(l => { page.drawText(l, { x: ML, y, size: SZ, font: fN, color: cMain }); y -= LS; });
+  y -= 7 * MM;
+
+  /* ── Saludo ── */
+  page.drawText('Cordial saludo.', { x: ML, y, size: SZ, font: fN, color: cMain });
+  y -= 9 * MM;
+
+  /* ── Párrafo 1 ── */
+  y = libDrawMixed(page, [
+    { t: 'Por medio de la presente nos permitimos requerir formalmente el pago de los servicios públicos domiciliarios pendientes correspondientes al inmueble citado en referencia, obligación que, de conformidad con el contrato de arrendamiento suscrito, se encuentra a su cargo como arrendatario.' }
+  ], ML, y, CW, LS, SZ, fN, fB, cMain, cMain) - 3 * MM;
+
+  /* ── Párrafo 2 ── */
+  y = libDrawMixed(page, [
+    { t: 'Una vez revisado el estado de cuenta del inmueble, se evidencia un saldo pendiente por concepto de servicios públicos por valor de ' },
+    { t: v(client.valor_total), b: 1 },
+    { t: ', discriminado de acuerdo con las facturas emitidas por las respectivas empresas prestadoras del servicio.' }
+  ], ML, y, CW, LS, SZ, fN, fB, cMain, cMain) - 7 * MM;
+
+  /* ── Tabla de servicios ── */
+  const colW = [CW * 0.38, CW * 0.32, CW * 0.30];
+  const rowH = 6.5 * MM;
+  const tSZ  = 10;
+  const tLS  = tSZ * 1.5;
+
+  /* Encabezado tabla */
+  page.drawRectangle({ x: ML, y: y - rowH * 0.2, width: CW, height: rowH, color: rgb(0.94,0.99,0.97) });
+  const headers = ['Servicios Públicos', 'Contrato / Póliza', 'Valor'];
+  let colX = ML;
+  headers.forEach((h, i) => {
+    const tw = fB.widthOfTextAtSize(pdfSafe(h), tSZ);
+    const centeredX = colX + (colW[i] - tw) / 2;
+    page.drawText(pdfSafe(h), { x: centeredX, y: y + rowH * 0.15, size: tSZ, font: fB, color: cMain });
+    colX += colW[i];
+  });
+  y -= rowH;
+
+  /* Filas */
+  const services = [
+    [client.servicio_1, client.contrato_1, client.valor_1],
+    [client.servicio_2, client.contrato_2, client.valor_2],
+    [client.servicio_3, client.contrato_3, client.valor_3]
+  ].filter(r => v(r[0]));
+
+  services.forEach(([s, con, val]) => {
+    colX = ML;
+    [v(s), v(con), v(val)].forEach((txt, i) => {
+      const font = i === 0 ? fB : fN;
+      const tw   = font.widthOfTextAtSize(pdfSafe(txt), tSZ);
+      const centeredX = colX + (colW[i] - tw) / 2;
+      page.drawText(pdfSafe(txt), { x: centeredX, y: y + rowH * 0.15, size: tSZ, font, color: cMain });
+      colX += colW[i];
+    });
+    page.drawLine({ start: { x: ML, y }, end: { x: ML + CW, y }, thickness: 0.5, color: rgb(0.88,0.88,0.88) });
+    y -= rowH;
+  });
+
+  y -= 3 * MM;
+
+  /* ── Párrafo 3 ── */
+  y = libDrawMixed(page, [
+    { t: 'Le solicitamos realizar el pago de esta obligación dentro de los cinco (5) días hábiles siguientes al recibo de la presente comunicación y remitir el respectivo soporte.' }
+  ], ML, y, CW, LS, SZ, fN, fB, cMain, cMain) - 7 * MM;
+
+  /* ── Párrafo 4 ── */
+  y = libDrawMixed(page, [
+    { t: 'Es importante señalar que el incumplimiento de esta obligación genera perjuicios al inmueble y a su propietario, pudiendo dar lugar al inicio de las acciones de cobro pre jurídico y jurídico a que haya lugar, así como al cobro de intereses, costos y gastos derivados de la recuperación de la cartera.' }
+  ], ML, y, CW, LS, SZ, fN, fB, cMain, cMain) - 7 * MM;
+
+  /* ── Cierre ── */
+  page.drawText('Agradecemos su pronta atención y cumplimiento de esta obligación.', { x: ML, y, size: SZ, font: fN, color: cMain });
+  y -= 12 * MM;
+
+  page.drawText('Atentamente,', { x: ML, y, size: SZ, font: fN, color: cMain });
+  y -= 18 * MM;
+
+  page.drawText('GRUPO ARENAS S.A.S.', { x: ML, y, size: SZ, font: fB, color: cMain });
+  y -= LS;
+  page.drawText('Área de Cartera y Cobranza', { x: ML, y, size: SZ, font: fN, color: cMain });
+
+  return pdfDoc.save();
+}
+
+/* ── Nombre PDF SP ── */
+function pdfNameSP(client) {
+  const nm = v(client.nombre_cliente).replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'').substring(0,40);
+  return `Carta_SP_${nm}.pdf`;
+}
+
+/* ── PDF individual SP ── */
+async function generatePDFSingleSP() {
+  if (!APP.selectedClient) {
+    showToast('Seleccione un destinatario para generar el PDF.', 'warning');
+    return;
+  }
+  showLoading('Generando PDF con membrete...');
+  await delay(50);
+  try {
+    if (APP.membreteBytes) {
+      const bytes = await buildPDFSPWithTemplate(APP.selectedClient);
+      saveAs(new Blob([bytes], { type: 'application/pdf' }), pdfNameSP(APP.selectedClient));
+    } else {
+      buildPDFSPFallback(APP.selectedClient).save(pdfNameSP(APP.selectedClient));
+    }
+    setStep(6);
+    showToast('PDF de servicios públicos generado correctamente.', 'success');
+  } catch (err) {
+    showToast('Error al generar el PDF: ' + err.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+/* ── PDF consolidado SP ── */
+async function generatePDFConsolidatedSP() {
+  if (APP.clients.length === 0) {
+    showToast('No hay destinatarios cargados.', 'warning');
+    return;
+  }
+  showLoading(`Generando PDF consolidado (${APP.clients.length} cartas)...`);
+  await delay(50);
+  try {
+    if (APP.membreteBytes) {
+      const { PDFDocument } = PDFLib;
+      const merged = await PDFDocument.create();
+      for (let i = 0; i < APP.clients.length; i++) {
+        document.getElementById('loadingMsg').textContent =
+          `Procesando carta ${i + 1} de ${APP.clients.length}...`;
+        await delay(5);
+        const bytes  = await buildPDFSPWithTemplate(APP.clients[i]);
+        const single = await PDFDocument.load(bytes);
+        const [emb]  = await merged.embedPdf(single, [0]);
+        const { width: pw, height: ph } = single.getPage(0).getSize();
+        const pg = merged.addPage([pw, ph]);
+        pg.drawPage(emb, { x: 0, y: 0, width: pw, height: ph });
+      }
+      const out = await merged.save();
+      saveAs(new Blob([out], { type: 'application/pdf' }),
+        'Cartas_ServiciosPublicos_Arenas_Inmobiliaria.pdf');
+    } else {
+      const { jsPDF } = window.jspdf;
+      let doc = null;
+      for (let i = 0; i < APP.clients.length; i++) {
+        const pageDoc = buildPDFSPFallback(APP.clients[i]);
+        if (!doc) { doc = pageDoc; }
+        else { doc.addPage('letter','portrait'); buildSPPageInDoc(doc, APP.clients[i]); }
+      }
+      doc.save('Cartas_ServiciosPublicos_Arenas_Inmobiliaria.pdf');
+    }
+    setStep(6);
+    showToast(`PDF consolidado de servicios públicos generado con ${APP.clients.length} carta(s).`, 'success');
+  } catch (err) {
+    showToast('Error al generar el PDF consolidado: ' + err.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+/* ── ZIP SP ── */
+async function generatePDFZipSP() {
+  if (APP.clients.length === 0) {
+    showToast('No hay destinatarios cargados.', 'warning');
+    return;
+  }
+  showLoading(`Generando ${APP.clients.length} PDF de servicios públicos...`);
+  await delay(80);
+  try {
+    const zip    = new JSZip();
+    const folder = zip.folder('Cartas_ServiciosPublicos_Arenas');
+    for (let i = 0; i < APP.clients.length; i++) {
+      const c = APP.clients[i];
+      document.getElementById('loadingMsg').textContent =
+        `Generando PDF ${i + 1} de ${APP.clients.length}...`;
+      await delay(10);
+      let bytes;
+      if (APP.membreteBytes) {
+        bytes = await buildPDFSPWithTemplate(c);
+      } else {
+        bytes = buildPDFSPFallback(c).output('arraybuffer');
+      }
+      folder.file(pdfNameSP(c), bytes);
+    }
+    document.getElementById('loadingMsg').textContent = 'Comprimiendo archivos...';
+    await delay(30);
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    saveAs(blob, 'Cartas_ServiciosPublicos_Arenas_Inmobiliaria.zip');
+    setStep(6);
+    showToast(`ZIP de servicios públicos generado con ${APP.clients.length} PDF.`, 'success');
+  } catch (err) {
+    showToast('Error al generar el ZIP: ' + err.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+/* ── Fallback jsPDF para SP (sin membrete) ── */
+function buildPDFSPFallback(client) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+  buildSPPageInDoc(doc, client);
+  return doc;
+}
+
+function buildSPPageInDoc(doc, client) {
+  const PW = 215.9, ML = 22, MR = 22;
+  const CW = PW - ML - MR;
+  const LS = 5.8;
+  let y = 18;
+
+  if (APP.logoDataUrl) {
+    try {
+      const lW = 75, lA = APP.logoAspect || 0.28;
+      const lH = Math.min(lW * lA, 28);
+      doc.addImage(APP.logoDataUrl, 'PNG', ML, y, lW, lH, undefined, 'FAST');
+      y += lH + 4;
+    } catch (_) { y += 5; }
+  } else {
+    doc.setFontSize(16); doc.setFont('helvetica','bold'); doc.setTextColor(124,58,237);
+    doc.text('ARENAS INMOBILIARIA', ML, y + 8); y += 14;
+  }
+  doc.setDrawColor(226,232,240); doc.setLineWidth(0.3);
+  doc.line(ML, y, PW - MR, y); y += 2;
+
+  doc.setFontSize(10.5); doc.setFont('helvetica','normal'); doc.setTextColor(30,41,59);
+
+  doc.text(pdfSafe(v(client.fecha_carta)), ML, y); y += LS;
+  doc.text('Señor(a)', ML, y); y += LS;
+  doc.setFont('helvetica','bold');
+  doc.text(v(client.nombre_cliente).toUpperCase(), ML, y); y += LS;
+  doc.setFont('helvetica','normal');
+  doc.text('C.C. No ' + pdfSafe(v(client.cedula)), ML, y); y += LS;
+  const refLines = doc.splitTextToSize(pdfSafe('Ref.: Cobro de servicios públicos pendientes del inmueble ubicado en ' + v(client.direccion_inmueble)), CW);
+  doc.text(refLines, ML, y); y += refLines.length * LS + 7;
+
+  doc.text('Cordial saludo.', ML, y); y += 9;
+
+  const p1 = doc.splitTextToSize(pdfSafe('Por medio de la presente nos permitimos requerir formalmente el pago de los servicios públicos domiciliarios pendientes correspondientes al inmueble citado en referencia, obligación que, de conformidad con el contrato de arrendamiento suscrito, se encuentra a su cargo como arrendatario.'), CW);
+  doc.text(p1, ML, y); y += p1.length * LS + 2;
+
+  const p2 = doc.splitTextToSize(pdfSafe('Una vez revisado el estado de cuenta del inmueble, se evidencia un saldo pendiente por concepto de servicios públicos por valor de ' + v(client.valor_total) + ', discriminado de acuerdo con las facturas emitidas por las respectivas empresas prestadoras del servicio.'), CW);
+  doc.text(p2, ML, y); y += p2.length * LS + 5;
+
+  /* Tabla servicios */
+  const cols = [CW * 0.38, CW * 0.32, CW * 0.30];
+  const rH = 6;
+  const tblCenter = (txt, colStart, colWidth) => {
+    const tw = doc.getTextWidth(txt);
+    return colStart + (colWidth - tw) / 2;
+  };
+
+  doc.setFillColor(236,253,245); doc.rect(ML, y, CW, rH, 'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text('Servicios Públicos', tblCenter('Servicios Públicos', ML, cols[0]), y + rH * 0.7);
+  doc.text('Contrato / Póliza',  tblCenter('Contrato / Póliza',  ML + cols[0], cols[1]), y + rH * 0.7);
+  doc.text('Valor',              tblCenter('Valor',              ML + cols[0] + cols[1], cols[2]), y + rH * 0.7);
+  y += rH;
+
+  [[client.servicio_1, client.contrato_1, client.valor_1],
+   [client.servicio_2, client.contrato_2, client.valor_2],
+   [client.servicio_3, client.contrato_3, client.valor_3]]
+  .filter(r => v(r[0]))
+  .forEach(([s, con, val]) => {
+    doc.setFontSize(9);
+    const ts = pdfSafe(v(s)), tc = pdfSafe(v(con)), tv = pdfSafe(v(val));
+    doc.setFont('helvetica','bold');
+    doc.text(ts, tblCenter(ts, ML,              cols[0]), y + rH * 0.7);
+    doc.setFont('helvetica','normal');
+    doc.text(tc, tblCenter(tc, ML + cols[0],    cols[1]), y + rH * 0.7);
+    doc.text(tv, tblCenter(tv, ML + cols[0] + cols[1], cols[2]), y + rH * 0.7);
+    doc.setDrawColor(220,220,220); doc.setLineWidth(0.2);
+    doc.line(ML, y + rH, ML + CW, y + rH);
+    y += rH;
+  });
+  y += 3;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(30,41,59);
+
+  const p3 = doc.splitTextToSize(pdfSafe('Le solicitamos realizar el pago de esta obligación dentro de los cinco (5) días hábiles siguientes al recibo de la presente comunicación y remitir el respectivo soporte.'), CW);
+  doc.text(p3, ML, y); y += p3.length * LS + 5;
+
+  const p4 = doc.splitTextToSize(pdfSafe('Es importante señalar que el incumplimiento de esta obligación genera perjuicios al inmueble y a su propietario, pudiendo dar lugar al inicio de las acciones de cobro pre jurídico y jurídico a que haya lugar, así como al cobro de intereses, costos y gastos derivados de la recuperación de la cartera.'), CW);
+  doc.text(p4, ML, y); y += p4.length * LS + 7;
+
+  doc.text(pdfSafe('Agradecemos su pronta atención y cumplimiento de esta obligación.'), ML, y); y += 8;
+  doc.text('Atentamente,', ML, y); y += 18;
+  doc.setFont('helvetica','bold');
+  doc.text('GRUPO ARENAS S.A.S.', ML, y); y += LS;
+  doc.setFont('helvetica','normal');
+  doc.text('Área de Cartera y Cobranza', ML, y);
+}
+
+/* ══════════════════════════════════════════════════════════
+   MÓDULO: CARTAS DE DESOCUPACIÓN (mantener abajo)
+══════════════════════════════════════════════════════════ */
 
 function buildDesocPageInDoc(doc, client) {
   const PW = 215.9, ML = 22, MR = 22;
