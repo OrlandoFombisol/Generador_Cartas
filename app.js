@@ -14,15 +14,80 @@ const APP = {
   logoDataUrl: null,
   logoAspect: 0.28,
   membreteBytes: null,   /* bytes del PDF membrete plantilla */
-  currentStep: 1
+  currentStep: 1,
+  module: 'aumento'
 };
 
-const REQUIRED_COLS = [
-  'fecha_carta','nombre_cliente','direccion','ciudad','asunto',
-  'conjunto','apartamento','valor_admon_letras','valor_admon_numero',
-  'mes_factura','periodo_retroactivo','valor_retroactivo',
-  'empresa_factura','link_pago'
-];
+/* Módulos de carta. Cada uno define su formato Excel, la tabla de clientes
+   y los nombres de archivo; el texto de la carta vive en render/PDF. */
+const MODULES = {
+  aumento: {
+    nameKey: 'nombre_cliente',
+    cols: [
+      'fecha_carta','nombre_cliente','direccion','ciudad','asunto',
+      'conjunto','apartamento','valor_admon_letras','valor_admon_numero',
+      'mes_factura','periodo_retroactivo','valor_retroactivo',
+      'empresa_factura','link_pago'
+    ],
+    example: [
+      'Barranquilla, 19 de mayo 2026',
+      'GUTIERREZ NOGUERA XIMENA',
+      'CL 104 53 49 CON ZION TOWERS TO 1 AP 901',
+      'Ciudad',
+      'Aumento admón.',
+      'CONJUNTO RESIDENCIAL ZION TOWERS',
+      'AP 901',
+      'UN MILLÓN QUINIENTOS VEINTICUATRO MIL PESOS',
+      '$1.524.000',
+      'JULIO 2026',
+      'ENERO 2026 A JUNIO 2026',
+      '$756.000',
+      'Grupo Arenas S.A.',
+      'https://www.psepagos.co/PSEHostingUI/showTicketOffice.aspx?ID=5025'
+    ],
+    widths: [35,35,45,20,25,40,14,45,18,18,28,18,28,70],
+    templateFile: 'Formato_Cartas_Arenas_Inmobiliaria.xlsx',
+    tableCols: [
+      { k: 'nombre_cliente',    h: 'Cliente', strong: true },
+      { k: 'direccion',         h: 'Dirección' },
+      { k: 'conjunto',          h: 'Conjunto' },
+      { k: 'apartamento',       h: 'Apto' },
+      { k: 'valor_admon_numero', h: 'Valor admón.' },
+      { k: 'valor_retroactivo', h: 'Retroactivo' }
+    ],
+    consolidatedFile: 'Cartas_Aumento_Administracion_Arenas_Inmobiliaria.pdf',
+    zipFile: 'Cartas_Arenas_Inmobiliaria.zip',
+    zipFolder: 'Cartas_Arenas_Inmobiliaria'
+  },
+  cobro: {
+    nameKey: 'nombre_arrendatario',
+    cols: [
+      'fecha_carta','nombre_arrendatario','direccion_inmueble',
+      'meses_adeudados','valor_adeudado','link_pago'
+    ],
+    example: [
+      '19 de mayo de 2026',
+      'GUTIERREZ NOGUERA XIMENA',
+      'CL 104 53 49 CON ZION TOWERS TO 1 AP 901',
+      'ENERO 2026 / FEBRERO 2026',
+      '$1.524.000',
+      'https://www.psepagos.co/PSEHostingUI/showTicketOffice.aspx?ID=5025'
+    ],
+    widths: [24,35,45,32,18,70],
+    templateFile: 'Formato_Cobro_Canones_Arenas_Inmobiliaria.xlsx',
+    tableCols: [
+      { k: 'nombre_arrendatario', h: 'Arrendatario', strong: true },
+      { k: 'direccion_inmueble',  h: 'Inmueble' },
+      { k: 'meses_adeudados',     h: 'Meses adeudados' },
+      { k: 'valor_adeudado',      h: 'Valor' }
+    ],
+    consolidatedFile: 'Cartas_Cobro_Canones_Arenas_Inmobiliaria.pdf',
+    zipFile: 'Cartas_Cobro_Canones_Arenas_Inmobiliaria.zip',
+    zipFolder: 'Cartas_Cobro_Canones_Arenas_Inmobiliaria'
+  }
+};
+
+const mod = () => MODULES[APP.module];
 
 /* ══════════════════════════════════════════════════════════
    INICIALIZACIÓN
@@ -94,6 +159,8 @@ function bindEvents() {
 
   /* Dashboard */
   document.getElementById('btnLogout').addEventListener('click', logout);
+  document.querySelectorAll('.module-tab').forEach(btn =>
+    btn.addEventListener('click', () => setModule(btn.dataset.module)));
   document.getElementById('btnDownloadTemplate').addEventListener('click', downloadTemplate);
   document.getElementById('btnSelectFile').addEventListener('click', () => document.getElementById('fileInput').click());
   document.getElementById('fileInput').addEventListener('change', handleFileSelect);
@@ -299,6 +366,25 @@ function togglePassword() {
 }
 
 /* ══════════════════════════════════════════════════════════
+   MÓDULOS
+══════════════════════════════════════════════════════════ */
+
+function setModule(id) {
+  if (!MODULES[id] || id === APP.module) return;
+  const hadFile = APP.clients.length > 0;
+  APP.module = id;
+  clearFile(true);   /* los datos cargados pertenecen al módulo anterior */
+
+  document.querySelectorAll('.module-tab').forEach(btn =>
+    btn.classList.toggle('active', btn.dataset.module === id));
+  document.getElementById('dlColsInfo').textContent = `${mod().cols.length} columnas predefinidas`;
+
+  showToast(hadFile
+    ? 'Módulo cambiado. Se eliminó el archivo cargado; descargue o cargue el formato de este módulo.'
+    : 'Módulo cambiado.', 'info');
+}
+
+/* ══════════════════════════════════════════════════════════
    STEPPER
 ══════════════════════════════════════════════════════════ */
 
@@ -318,43 +404,16 @@ function setStep(n) {
 ══════════════════════════════════════════════════════════ */
 
 function downloadTemplate() {
-  const headers = [
-    'fecha_carta','nombre_cliente','direccion','ciudad','asunto',
-    'conjunto','apartamento','valor_admon_letras','valor_admon_numero',
-    'mes_factura','periodo_retroactivo','valor_retroactivo',
-    'empresa_factura','link_pago'
-  ];
-
-  const example = [
-    'Barranquilla, 19 de mayo 2026',
-    'GUTIERREZ NOGUERA XIMENA',
-    'CL 104 53 49 CON ZION TOWERS TO 1 AP 901',
-    'Ciudad',
-    'Aumento admón.',
-    'CONJUNTO RESIDENCIAL ZION TOWERS',
-    'AP 901',
-    'UN MILLÓN QUINIENTOS VEINTICUATRO MIL PESOS',
-    '$1.524.000',
-    'JULIO 2026',
-    'ENERO 2026 A JUNIO 2026',
-    '$756.000',
-    'Grupo Arenas S.A.',
-    'https://www.psepagos.co/PSEHostingUI/showTicketOffice.aspx?ID=5025'
-  ];
-
+  const m = mod();
   const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet([headers, example]);
+  const ws = XLSX.utils.aoa_to_sheet([m.cols, m.example]);
 
   /* Anchos de columna */
-  ws['!cols'] = [
-    {wch:35},{wch:35},{wch:45},{wch:20},{wch:25},
-    {wch:40},{wch:14},{wch:45},{wch:18},
-    {wch:18},{wch:28},{wch:18},{wch:28},{wch:70}
-  ];
+  ws['!cols'] = m.widths.map(wch => ({ wch }));
 
   /* Estilo encabezado (solo aplica en xlsx con xlsxStyle, aquí básico) */
   XLSX.utils.book_append_sheet(wb, ws, 'Cartas');
-  XLSX.writeFile(wb, 'Formato_Cartas_Arenas_Inmobiliaria.xlsx');
+  XLSX.writeFile(wb, m.templateFile);
 
   showToast('Formato Excel descargado correctamente.', 'success');
   setStep(2);
@@ -417,7 +476,7 @@ function validateData(raw, fileName) {
 
   /* Normalizar headers */
   const headers = Object.keys(raw[0]).map(h => h.trim().toLowerCase().replace(/\s+/g,'_'));
-  const missing = REQUIRED_COLS.filter(c => !headers.includes(c));
+  const missing = mod().cols.filter(c => !headers.includes(c));
 
   if (missing.length > 0) {
     return {
@@ -438,10 +497,11 @@ function validateData(raw, fileName) {
   });
 
   /* Filtrar filas completamente vacías */
-  const valid = clients.filter(c => c.nombre_cliente && c.nombre_cliente.length > 0);
+  const nameKey = mod().nameKey;
+  const valid = clients.filter(c => c[nameKey] && c[nameKey].length > 0);
 
   if (valid.length === 0) {
-    return { ok: false, message: 'No se encontraron clientes con datos válidos en el archivo. Verifique que la columna nombre_cliente esté diligenciada.' };
+    return { ok: false, message: `No se encontraron clientes con datos válidos en el archivo. Verifique que la columna ${nameKey} esté diligenciada.` };
   }
 
   return { ok: true, clients: valid };
@@ -498,11 +558,16 @@ function renderClients(list) {
   const tbody = document.getElementById('clientTableBody');
   const cardsWrap = document.getElementById('clientCards');
 
+  const cols = mod().tableCols;
+  const [nameCol, ...infoCols] = cols;
+
+  document.querySelector('#clientTable thead').innerHTML =
+    `<tr><th>#</th>${cols.map(col => `<th>${col.h}</th>`).join('')}<th>Acción</th></tr>`;
   tbody.innerHTML = '';
   cardsWrap.innerHTML = '';
 
   if (list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="table-empty">No se encontraron clientes con ese criterio de búsqueda.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${cols.length + 2}" class="table-empty">No se encontraron clientes con ese criterio de búsqueda.</td></tr>`;
     cardsWrap.innerHTML = `<p class="table-empty">No se encontraron clientes.</p>`;
     return;
   }
@@ -516,12 +581,7 @@ function renderClients(list) {
     if (isSelected) tr.classList.add('selected');
     tr.innerHTML = `
       <td>${c._index + 1}</td>
-      <td><strong>${esc(c.nombre_cliente)}</strong></td>
-      <td>${esc(c.direccion)}</td>
-      <td>${esc(c.conjunto)}</td>
-      <td>${esc(c.apartamento)}</td>
-      <td>${esc(c.valor_admon_numero)}</td>
-      <td>${esc(c.valor_retroactivo)}</td>
+      ${cols.map(col => `<td>${col.strong ? `<strong>${esc(c[col.k])}</strong>` : esc(c[col.k])}</td>`).join('')}
       <td>
         <button class="btn-select-client${isSelected ? ' selected-btn' : ''}" data-idx="${c._index}">
           ${isSelected ? '✓ Seleccionado' : 'Ver carta'}
@@ -535,12 +595,8 @@ function renderClients(list) {
     div.className = `client-card${isSelected ? ' selected' : ''}`;
     div.dataset.idx = c._index;
     div.innerHTML = `
-      <div class="client-card-name">${esc(c.nombre_cliente)}</div>
-      <div class="client-card-row"><span>Dirección</span><span>${esc(c.direccion)}</span></div>
-      <div class="client-card-row"><span>Conjunto</span><span>${esc(c.conjunto)}</span></div>
-      <div class="client-card-row"><span>Apto</span><span>${esc(c.apartamento)}</span></div>
-      <div class="client-card-row"><span>Valor admón.</span><span>${esc(c.valor_admon_numero)}</span></div>
-      <div class="client-card-row"><span>Retroactivo</span><span>${esc(c.valor_retroactivo)}</span></div>
+      <div class="client-card-name">${esc(c[nameCol.k])}</div>
+      ${infoCols.map(col => `<div class="client-card-row"><span>${col.h}</span><span>${esc(c[col.k])}</span></div>`).join('')}
       <div class="client-card-actions">
         <button class="btn-select-client${isSelected ? ' selected-btn' : ''}" style="width:100%;justify-content:center;" data-idx="${c._index}">
           ${isSelected ? '✓ Seleccionado' : 'Ver carta'}
@@ -558,8 +614,7 @@ function handleSearch(e) {
   const q = e.target.value.toLowerCase().trim();
   if (!q) { renderClients(APP.clients); return; }
   const filtered = APP.clients.filter(c =>
-    (c.nombre_cliente + c.direccion + c.conjunto + c.apartamento + c.ciudad)
-      .toLowerCase().includes(q)
+    Object.entries(c).filter(([k]) => k !== '_index').map(([, val]) => val).join(' ').toLowerCase().includes(q)
   );
   renderClients(filtered);
 }
@@ -607,7 +662,7 @@ function selectClient(client) {
     document.getElementById('cardPreview').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 200);
 
-  showToast(`Cliente seleccionado: ${client.nombre_cliente}`, 'info');
+  showToast(`Cliente seleccionado: ${client[mod().nameKey]}`, 'info');
 }
 
 function renderLetterPreview(c) {
@@ -637,6 +692,7 @@ function renderLetterPreview(c) {
         color:#000;
         line-height:1.55;
       ">
+        ${APP.module === 'cobro' ? cobroPreviewInner(c) : `
         <p style="margin:0 0 .6em 0">${esc(c.fecha_carta)}</p>
 
         <p style="margin:0">Señor(a)(es)</p>
@@ -671,7 +727,7 @@ function renderLetterPreview(c) {
         </p>
 
         <p style="margin:0 0 1.8em 0">Atentamente,</p>
-        <p style="margin:0;font-weight:700">Dpto. de Cartera</p>
+        <p style="margin:0;font-weight:700">Dpto. de Cartera</p>`}
       </div>
     </div>`;
 
@@ -686,6 +742,59 @@ function renderLetterPreview(c) {
     sheet.style.opacity = '1';
     sheet.style.transform = 'translateY(0)';
   });
+}
+
+/* ══════════════════════════════════════════════════════════
+   MÓDULO COBRANZA DE CÁNONES · textos de la carta
+══════════════════════════════════════════════════════════ */
+
+/* La fecha se digita sola ("19 de mayo de 2026"); la ciudad va fija. */
+function cobroFecha(c) {
+  const f = v(c.fecha_carta);
+  return /^barranquilla/i.test(f) ? f : `Barranquilla, ${f}`;
+}
+
+/* El "$" va fuera del dato, como en el formato base. */
+function cobroValor(c) {
+  const s = v(c.valor_adeudado);
+  return s.startsWith('$') ? s : `$${s}`;
+}
+
+function cobroPreviewInner(c) {
+  return `
+        <p style="margin:0 0 .9em 0;font-weight:700">${esc(cobroFecha(c))}</p>
+
+        <p style="margin:0">Señor(a)(es)</p>
+        <p style="margin:0;font-weight:700">${esc(v(c.nombre_arrendatario).toUpperCase())}</p>
+        <p style="margin:0;font-weight:700">${esc(c.direccion_inmueble)}</p>
+        <p style="margin:0 0 .9em 0;font-weight:700">Barranquilla</p>
+
+        <p style="margin:0 0 1.4em 0;font-weight:700">Asunto: Cobro canon(es) de arrendamiento</p>
+
+        <p style="margin:0 0 .6em 0">Cordial saludo,</p>
+
+        <p style="margin:0 0 .7em 0;text-align:justify">
+          De acuerdo con la información registrada en nuestro sistema de cartera, a la fecha se
+          encuentra pendiente el pago del(los)
+          <strong>canon(es) de arrendamiento correspondiente(s) al(los) mes(es) de
+          ${esc(c.meses_adeudados)}</strong>, por valor de <strong>${esc(cobroValor(c))}</strong>.
+        </p>
+
+        <p style="margin:0 0 1.6em 0;text-align:justify">
+          Por tal motivo, solicitamos realizar el pago de la obligación pendiente a la mayor
+          brevedad, con el fin de mantener su cuenta al día y evitar la generación de
+          <strong>sanciones moratorias</strong> y demás gestiones de cobro a que haya lugar.
+        </p>
+
+        <p style="margin:0 0 .25em 0;font-weight:700;font-size:.9em">PUEDE CANCELAR POR MEDIO DE ESTE LINK:</p>
+        <p style="margin:0 0 1em 0;word-break:break-all;font-size:.9em">
+          <a href="${esc(c.link_pago)}" target="_blank" rel="noopener" style="color:#000">${esc(c.link_pago)}</a>
+        </p>
+
+        <p style="margin:0 0 1.8em 0">Agradecemos realizar el pago y remitir el respectivo comprobante de pago.</p>
+
+        <p style="margin:0 0 1.8em 0">Cordialmente,</p>
+        <p style="margin:0;font-weight:700">Dpto. de Cartera</p>`;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -763,6 +872,11 @@ async function buildPDFWithTemplate(client) {
   const cRed    = rgb(0, 0, 0);
   const cSubtle = rgb(0, 0, 0);
 
+  if (APP.module === 'cobro') {
+    drawCobroLetter(page, PH, client, fN, fB, cMain);
+    return pdfDoc.save();
+  }
+
   /* ── Medidas ────────────────────────────────────────────────────
      El membrete (header con logo + datos) ocupa ~30 mm desde arriba.
      El área útil de la carta va de ~33 mm a ~185 mm desde el tope.
@@ -839,6 +953,66 @@ async function buildPDFWithTemplate(client) {
   return pdfDoc.save();
 }
 
+/* Carta de cobranza de cánones sobre la página con membrete (mismas medidas
+   que la carta de aumento: margen 25 mm, ancho 165 mm, inicio a 51 mm). */
+function drawCobroLetter(page, PH, client, fN, fB, color) {
+  const MM = 2.835;
+  const ML = 25 * MM;
+  const CW = 165 * MM;
+  const SZ = 11;
+  const LS = 6 * MM;
+  let y = PH - 51 * MM;
+
+  const line = (text, font, size = SZ) => {
+    page.drawText(text, { x: ML, y, size, font, color });
+    y -= LS;
+  };
+
+  /* Fecha y destinatario */
+  page.drawText(cobroFecha(client), { x: ML, y, size: SZ, font: fB, color });
+  y -= 10 * MM;
+  line('Señor(a)(es)', fN);
+  line(v(client.nombre_arrendatario).toUpperCase(), fB);
+  libWrap(v(client.direccion_inmueble), CW, fB, SZ).forEach(l => line(l, fB));
+  page.drawText('Barranquilla', { x: ML, y, size: SZ, font: fB, color });
+  y -= 9 * MM;
+
+  /* Asunto y saludo */
+  page.drawText('Asunto: Cobro canon(es) de arrendamiento', { x: ML, y, size: SZ, font: fB, color });
+  y -= 12 * MM;
+  page.drawText('Cordial saludo,', { x: ML, y, size: SZ, font: fN, color });
+  y -= 9 * MM;
+
+  /* Cuerpo */
+  y = libDrawMixed(page, [
+    { t: 'De acuerdo con la información registrada en nuestro sistema de cartera, a la fecha se encuentra pendiente el pago del(los) ' },
+    { t: 'canon(es) de arrendamiento correspondiente(s) al(los) mes(es) de ' + v(client.meses_adeudados), b: 1 },
+    { t: ', por valor de ' },
+    { t: cobroValor(client), b: 1 },
+    { t: '.' }
+  ], ML, y, CW, LS, SZ, fN, fB, color, color) - 7 * MM;
+
+  y = libDrawMixed(page, [
+    { t: 'Por tal motivo, solicitamos realizar el pago de la obligación pendiente a la mayor brevedad, con el fin de mantener su cuenta al día y evitar la generación de ' },
+    { t: 'sanciones moratorias', b: 1 },
+    { t: ' y demás gestiones de cobro a que haya lugar.' }
+  ], ML, y, CW, LS, SZ, fN, fB, color, color) - 12 * MM;
+
+  /* Link de pago */
+  page.drawText('PUEDE CANCELAR POR MEDIO DE ESTE LINK:', { x: ML, y, size: 10, font: fB, color });
+  y -= 6 * MM;
+  libWrap(v(client.link_pago), CW, fN, 10).forEach(l => line(l, fN, 10));
+  y -= 4 * MM;
+
+  page.drawText('Agradecemos realizar el pago y remitir el respectivo comprobante de pago.', { x: ML, y, size: SZ, font: fN, color });
+  y -= 18 * MM;
+
+  /* Cierre */
+  page.drawText('Cordialmente,', { x: ML, y, size: SZ, font: fN, color });
+  y -= 18 * MM;
+  page.drawText('Dpto. de Cartera', { x: ML, y, size: SZ, font: fB, color });
+}
+
 /* ══════════════════════════════════════════════════════════
    GENERACIÓN DE PDF  (jsPDF directo — fallback sin membrete)
 ══════════════════════════════════════════════════════════ */
@@ -846,6 +1020,11 @@ async function buildPDFWithTemplate(client) {
 function buildPDFDoc(client) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+
+  if (APP.module === 'cobro') {
+    buildPageInDoc(doc, client);
+    return doc;
+  }
 
   const PW   = 215.9;   /* ancho hoja carta mm */
   const ML   = 22;      /* margen izquierdo    */
@@ -1010,9 +1189,10 @@ function renderMixedParagraph(doc, segments, x, y, maxW, ls, docRef) {
 
 /* Nombre del PDF para un cliente */
 function pdfName(client) {
-  const nm = v(client.nombre_cliente).replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'').substring(0,40);
+  const nm = v(client[mod().nameKey]).replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'').substring(0,40);
   const ap = v(client.apartamento).replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
-  return `Carta_${nm}${ap ? '_' + ap : ''}.pdf`;
+  const prefix = APP.module === 'cobro' ? 'Cobro' : 'Carta';
+  return `${prefix}_${nm}${ap ? '_' + ap : ''}.pdf`;
 }
 
 /* Valor seguro de campo */
@@ -1074,8 +1254,7 @@ async function generatePDFConsolidated() {
       }
 
       const merged = await mergedDoc.save();
-      saveAs(new Blob([merged], { type: 'application/pdf' }),
-             'Cartas_Aumento_Administracion_Arenas_Inmobiliaria.pdf');
+      saveAs(new Blob([merged], { type: 'application/pdf' }), mod().consolidatedFile);
     } else {
       /* Fallback sin membrete */
       const { jsPDF } = window.jspdf;
@@ -1085,7 +1264,7 @@ async function generatePDFConsolidated() {
         if (i === 0) { mergedDoc = pageDoc; }
         else { mergedDoc.addPage('letter','portrait'); buildPageInDoc(mergedDoc, APP.clients[i]); }
       }
-      mergedDoc.save('Cartas_Aumento_Administracion_Arenas_Inmobiliaria.pdf');
+      mergedDoc.save(mod().consolidatedFile);
     }
 
     setStep(6);
@@ -1120,6 +1299,8 @@ function buildPageInDoc(doc, client) {
 
   doc.setDrawColor(226,232,240); doc.setLineWidth(0.3);
   doc.line(ML, y, PW - MR, y); y += 8;
+
+  if (APP.module === 'cobro') { buildCobroBodyInDoc(doc, client, ML, y, CW, LS); return; }
 
   doc.setFontSize(10.5); doc.setFont('helvetica','normal'); doc.setTextColor(30,41,59);
   doc.text(v(client.fecha_carta), ML, y); y += 12;
@@ -1165,6 +1346,50 @@ function buildPageInDoc(doc, client) {
   doc.text('Dpto. de Cartera', ML, y);
 }
 
+/* Cuerpo de la carta de cobranza en jsPDF (sin membrete), desde la altura y */
+function buildCobroBodyInDoc(doc, client, ML, y, CW, LS) {
+  doc.setFontSize(10.5); doc.setTextColor(30,41,59);
+  const text = (str, bold) => {
+    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.text(str, ML, y);
+  };
+
+  text(cobroFecha(client), true);                          y += 12;
+  text('Señor(a)(es)');                                    y += LS;
+  text(v(client.nombre_arrendatario).toUpperCase(), true); y += LS;
+  const dirL = doc.splitTextToSize(v(client.direccion_inmueble), CW);
+  doc.setFont('helvetica','bold');
+  doc.text(dirL, ML, y);                                   y += dirL.length * LS;
+  text('Barranquilla', true);                              y += 11;
+  text('Asunto: Cobro canon(es) de arrendamiento', true);  y += 11;
+  text('Cordial saludo,');                                 y += 11;
+
+  y = renderMixedParagraph(doc, [
+    { text: 'De acuerdo con la información registrada en nuestro sistema de cartera, a la fecha se encuentra pendiente el pago del(los) ' },
+    { text: 'canon(es) de arrendamiento correspondiente(s) al(los) mes(es) de ' + v(client.meses_adeudados), bold: true },
+    { text: ', por valor de ' },
+    { text: cobroValor(client), bold: true },
+    { text: '.' }
+  ], ML, y, CW, LS, doc) + 9;
+
+  y = renderMixedParagraph(doc, [
+    { text: 'Por tal motivo, solicitamos realizar el pago de la obligación pendiente a la mayor brevedad, con el fin de mantener su cuenta al día y evitar la generación de ' },
+    { text: 'sanciones moratorias', bold: true },
+    { text: ' y demás gestiones de cobro a que haya lugar.' }
+  ], ML, y, CW, LS, doc) + 12;
+
+  doc.setFontSize(10);
+  text('PUEDE CANCELAR POR MEDIO DE ESTE LINK:', true);    y += 7;
+  doc.setFont('helvetica','normal');
+  const lkL = doc.splitTextToSize(v(client.link_pago), CW);
+  doc.text(lkL, ML, y);                                    y += lkL.length * LS + 5;
+
+  doc.setFontSize(10.5);
+  text('Agradecemos realizar el pago y remitir el respectivo comprobante de pago.'); y += 22;
+  text('Cordialmente,');                                   y += 22;
+  text('Dpto. de Cartera', true);
+}
+
 /* ── Generar todos como ZIP ── */
 async function generatePDFZip() {
   if (APP.clients.length === 0) {
@@ -1180,7 +1405,7 @@ async function generatePDFZip() {
 
   try {
     const zip = new JSZip();
-    const folder = zip.folder('Cartas_Arenas_Inmobiliaria');
+    const folder = zip.folder(mod().zipFolder);
 
     for (let i = 0; i < APP.clients.length; i++) {
       const c = APP.clients[i];
@@ -1201,7 +1426,7 @@ async function generatePDFZip() {
     await delay(30);
 
     const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-    saveAs(blob, 'Cartas_Arenas_Inmobiliaria.zip');
+    saveAs(blob, mod().zipFile);
 
     setStep(6);
     showToast(`ZIP generado con ${APP.clients.length} PDF correctamente.`, 'success');

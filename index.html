@@ -387,6 +387,18 @@
 
     </div><!-- /dash-banner -->
 
+    <!-- Selector de módulo -->
+    <nav class="module-tabs" id="moduleTabs" aria-label="Módulo de cartas">
+      <button type="button" class="module-tab active" data-module="aumento">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Aumento de administración
+      </button>
+      <button type="button" class="module-tab" data-module="cobro">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Cobranza de cánones de arriendo
+      </button>
+    </nav>
+
     <!-- Stepper -->
     <div class="stepper" id="stepper">
       <div class="step-item active" id="si1" data-step="1">
@@ -486,7 +498,7 @@
       </div>
       <div class="card-body">
         <div class="download-info">
-          <div class="download-info-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>14 columnas predefinidas</span></div>
+          <div class="download-info-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="dlColsInfo">14 columnas predefinidas</span></div>
           <div class="download-info-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Fila de ejemplo incluida</span></div>
           <div class="download-info-item"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Compatible con Excel y LibreOffice</span></div>
         </div>
@@ -587,12 +599,7 @@
       <div class="card-body no-pad">
         <div class="table-wrap">
           <table class="client-table" id="clientTable">
-            <thead>
-              <tr>
-                <th>#</th><th>Cliente</th><th>Dirección</th><th>Conjunto</th>
-                <th>Apto</th><th>Valor admón.</th><th>Retroactivo</th><th>Acción</th>
-              </tr>
-            </thead>
+            <thead></thead>
             <tbody id="clientTableBody"></tbody>
           </table>
         </div>
