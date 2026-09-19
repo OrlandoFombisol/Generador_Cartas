@@ -1333,6 +1333,13 @@ html.dark .dash-banner { border-color: rgba(43,109,232,0.3); }
   box-shadow: 0 6px 28px rgba(5,150,105,0.38), 0 2px 8px rgba(5,150,105,0.2);
 }
 
+/* ── Cobro card: violet active (color de marca) ── */
+.module-card.cobro-card.active {
+  background: linear-gradient(135deg, #5B21B6 0%, #7C3AED 100%);
+  border-color: rgba(124,58,237,0.45);
+  box-shadow: 0 6px 28px rgba(124,58,237,0.38), 0 2px 8px rgba(124,58,237,0.2);
+}
+
 /* Hover: inactive cards */
 .module-card.admin-card:not(.active):hover {
   border-color: #2B6DE8;
@@ -1349,17 +1356,24 @@ html.dark .dash-banner { border-color: rgba(43,109,232,0.3); }
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
+.module-card.cobro-card:not(.active):hover {
+  border-color: #7C3AED;
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
 
 /* Text inside active cards */
 .module-card.admin-card.active .module-card-title,
 .module-card.desoc-card.active .module-card-title,
-.module-card.sp-card.active .module-card-title {
+.module-card.sp-card.active .module-card-title,
+.module-card.cobro-card.active .module-card-title {
   color: rgba(255,255,255,.97);
   transition: color 0.35s ease;
 }
 .module-card.admin-card.active .module-card-desc,
 .module-card.desoc-card.active .module-card-desc,
-.module-card.sp-card.active .module-card-desc {
+.module-card.sp-card.active .module-card-desc,
+.module-card.cobro-card.active .module-card-desc {
   color: rgba(255,255,255,.72);
   transition: color 0.35s ease;
 }
@@ -1367,7 +1381,8 @@ html.dark .dash-banner { border-color: rgba(43,109,232,0.3); }
 /* Icon inside active cards */
 .module-card.admin-card.active .module-card-icon,
 .module-card.desoc-card.active .module-card-icon,
-.module-card.sp-card.active .module-card-icon {
+.module-card.sp-card.active .module-card-icon,
+.module-card.cobro-card.active .module-card-icon {
   background: rgba(255,255,255,.2) !important;
   color: #fff !important;
   transition: background 0.35s ease, color 0.35s ease;
@@ -1387,6 +1402,7 @@ html.dark .dash-banner { border-color: rgba(43,109,232,0.3); }
 .module-card-icon.blue   { background: var(--c-blue-l); color: var(--c-blue); }
 .module-card-icon.orange { background: var(--c-orange-l); color: var(--c-orange); }
 .module-card-icon.green  { background: var(--c-green-l); color: var(--c-green); }
+.module-card-icon.purple { background: #F3EEFF; color: #7C3AED; }
 
 .module-card-content {
   display: flex;
@@ -1599,6 +1615,68 @@ html.dark .dash-mode-sp .dash-banner {
   animation: bannerGrad 14s ease infinite;
 }
 
+/* ══════════════════════════════════════════════════════════
+   DASHBOARD THEME — COBRANZA DE CÁNONES (violet palette)
+══════════════════════════════════════════════════════════ */
+
+.dash-mode-cobro .step-item.active .step-circle {
+  background: #7C3AED;
+  border-color: #7C3AED;
+  box-shadow: 0 0 0 5px rgba(124,58,237,.15), 0 4px 12px rgba(124,58,237,.3);
+}
+.dash-mode-cobro .step-item.active .step-num { color: #7C3AED; }
+
+.dash-mode-cobro .btn-pdf-main {
+  background: linear-gradient(135deg, #5B21B6, #7C3AED);
+  box-shadow: 0 4px 16px rgba(124,58,237,.3);
+}
+.dash-mode-cobro .btn-pdf-main:hover {
+  box-shadow: 0 8px 28px rgba(124,58,237,.45);
+}
+
+.dash-mode-cobro .file-card {
+  border-left-color: #7C3AED;
+}
+
+.dash-mode-cobro .btn-select-client:hover {
+  color: #5B21B6;
+}
+.dash-mode-cobro .btn-select-client.selected-btn {
+  background: #7C3AED;
+}
+
+.dash-mode-cobro .client-table tbody tr.selected {
+  background: #F5F0FF;
+}
+
+.dash-mode-cobro .card-header {
+  background: linear-gradient(135deg, var(--c-surface) 60%, #FAF7FF 100%);
+}
+
+.dash-mode-cobro .module-active-pill {
+  background: #7C3AED;
+}
+
+.dash-mode-cobro .dash-banner {
+  background: linear-gradient(-50deg, #12062B, #1E0B47, #2E1170, #12062B, #250E5C, #12062B);
+  background-size: 400% 400%;
+  animation: bannerGrad 14s ease infinite, slideUp 0.5s cubic-bezier(0.16,1,0.3,1) 0.08s both;
+}
+
+html.dark .dash-mode-cobro .step-item.active .step-circle {
+  background: #7C3AED; border-color: #7C3AED;
+  box-shadow: 0 0 0 5px rgba(124,58,237,.2), 0 4px 14px rgba(124,58,237,.35);
+}
+html.dark .dash-mode-cobro .card-header {
+  background: linear-gradient(135deg, var(--c-surface) 60%, #120826 100%);
+}
+html.dark .dash-mode-cobro .client-table tbody tr.selected { background: #120826; }
+html.dark .dash-mode-cobro .dash-banner {
+  background: linear-gradient(-50deg, #0B041C, #150833, #200C4F, #0B041C, #1A0A40, #0B041C);
+  background-size: 400% 400%;
+  animation: bannerGrad 14s ease infinite;
+}
+
 /* Dark mode base cards */
 html.dark .module-card { background: #0F1828; border-color: #1A2A44; }
 html.dark .module-card.admin-card.active {
@@ -1613,12 +1691,18 @@ html.dark .module-card.sp-card.active {
   background: linear-gradient(135deg, #033D28 0%, #056B48 100%);
   border-color: rgba(5,150,105,0.5);
 }
+html.dark .module-card.cobro-card.active {
+  background: linear-gradient(135deg, #3B1580 0%, #6D28D9 100%);
+  border-color: rgba(124,58,237,0.5);
+}
 html.dark .module-card.admin-card:not(.active):hover { border-color: #2B6DE8; }
 html.dark .module-card.desoc-card:not(.active):hover { border-color: #D97706; }
 html.dark .module-card.sp-card:not(.active):hover   { border-color: #059669; }
+html.dark .module-card.cobro-card:not(.active):hover { border-color: #7C3AED; }
 html.dark .module-card-icon.blue   { background: var(--c-blue-l); }
 html.dark .module-card-icon.orange { background: var(--c-orange-l); }
 html.dark .module-card-icon.green  { background: var(--c-green-l); }
+html.dark .module-card-icon.purple { background: #1A0F33; }
 
 @media (max-width: 640px) {
   .module-card { padding: .9rem 1rem; }

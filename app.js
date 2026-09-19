@@ -15,7 +15,7 @@ const APP = {
   logoAspect: 0.28,
   membreteBytes: null,   /* bytes del PDF membrete plantilla */
   currentStep: 1,
-  moduleType: 'admin'   /* 'admin' | 'desoc' | 'sp' */
+  moduleType: 'admin'   /* 'admin' | 'desoc' | 'sp' | 'cobro' */
 };
 
 const REQUIRED_COLS = [
@@ -36,6 +36,11 @@ const SP_COLS = [
   'servicio_1','contrato_1','valor_1',
   'servicio_2','contrato_2','valor_2',
   'servicio_3','contrato_3','valor_3'
+];
+
+const COBRO_COLS = [
+  'fecha_carta','nombre_cliente','direccion_inmueble',
+  'meses_adeudados','valor_adeudado','link_pago'
 ];
 
 /* ══════════════════════════════════════════════════════════
@@ -121,6 +126,7 @@ function bindEvents() {
   document.getElementById('btnModuleAdmin').addEventListener('click', () => switchModule('admin'));
   document.getElementById('btnModuleDesoc').addEventListener('click', () => switchModule('desoc'));
   document.getElementById('btnModuleSP').addEventListener('click', () => switchModule('sp'));
+  document.getElementById('btnModuleCobro').addEventListener('click', () => switchModule('cobro'));
 
   /* Arte SVG en tarjetas de módulo */
   applyModuleCardArt();
@@ -342,6 +348,7 @@ function setStep(n) {
 function downloadTemplate() {
   if (APP.moduleType === 'desoc') { downloadTemplateDesoc(); return; }
   if (APP.moduleType === 'sp')    { downloadTemplateSP();    return; }
+  if (APP.moduleType === 'cobro') { downloadTemplateCobro(); return; }
 
   const headers = [
     'fecha_carta','nombre_cliente','direccion','ciudad','asunto',
@@ -415,6 +422,7 @@ function processFile(file) {
 
       const validation = APP.moduleType === 'desoc' ? validateDataDesoc(raw, file.name)
         : APP.moduleType === 'sp' ? validateDataSP(raw, file.name)
+        : APP.moduleType === 'cobro' ? validateDataCobro(raw, file.name)
         : validateData(raw, file.name);
       hideLoading();
 
@@ -530,6 +538,7 @@ function clearFile(silent) {
 function renderClients(list) {
   if (APP.moduleType === 'desoc') { renderClientsDesoc(list); return; }
   if (APP.moduleType === 'sp')    { renderClientsSP(list);    return; }
+  if (APP.moduleType === 'cobro') { renderClientsCobro(list); return; }
   const tbody = document.getElementById('clientTableBody');
   const cardsWrap = document.getElementById('clientCards');
 
@@ -601,6 +610,10 @@ function handleSearch(e) {
       return (c.nombre_cliente + c.cedula + c.direccion_inmueble + c.ciudad)
         .toLowerCase().includes(q);
     }
+    if (APP.moduleType === 'cobro') {
+      return (c.nombre_cliente + c.direccion_inmueble + c.meses_adeudados)
+        .toLowerCase().includes(q);
+    }
     return (c.nombre_cliente + c.direccion + c.conjunto + c.apartamento + c.ciudad)
       .toLowerCase().includes(q);
   });
@@ -646,6 +659,8 @@ function selectClient(client) {
     renderLetterPreviewDesoc(client);
   } else if (APP.moduleType === 'sp') {
     renderLetterPreviewSP(client);
+  } else if (APP.moduleType === 'cobro') {
+    renderLetterPreviewCobro(client);
   } else {
     renderLetterPreview(client);
   }
@@ -1107,6 +1122,7 @@ function esc(str) {
 async function generatePDFSingle() {
   if (APP.moduleType === 'desoc') { await generatePDFSingleDesoc(); return; }
   if (APP.moduleType === 'sp')    { await generatePDFSingleSP();    return; }
+  if (APP.moduleType === 'cobro') { await generatePDFSingleCobro(); return; }
   if (!APP.selectedClient) {
     showToast('Seleccione un cliente para generar el PDF.', 'warning');
     return;
@@ -1133,6 +1149,7 @@ async function generatePDFSingle() {
 async function generatePDFConsolidated() {
   if (APP.moduleType === 'desoc') { await generatePDFConsolidatedDesoc(); return; }
   if (APP.moduleType === 'sp')    { await generatePDFConsolidatedSP();    return; }
+  if (APP.moduleType === 'cobro') { await generatePDFConsolidatedCobro(); return; }
   if (APP.clients.length === 0) {
     showToast('No hay clientes cargados para generar el PDF consolidado.', 'warning');
     return;
@@ -1253,6 +1270,7 @@ function buildPageInDoc(doc, client) {
 async function generatePDFZip() {
   if (APP.moduleType === 'desoc') { await generatePDFZipDesoc(); return; }
   if (APP.moduleType === 'sp')    { await generatePDFZipSP();    return; }
+  if (APP.moduleType === 'cobro') { await generatePDFZipCobro(); return; }
   if (APP.clients.length === 0) {
     showToast('No hay clientes cargados para generar los PDF.', 'warning');
     return;
@@ -1424,22 +1442,26 @@ function switchModule(type) {
   const btnAdmin = document.getElementById('btnModuleAdmin');
   const btnDesoc = document.getElementById('btnModuleDesoc');
   const btnSP    = document.getElementById('btnModuleSP');
+  const btnCobro = document.getElementById('btnModuleCobro');
   btnAdmin.classList.toggle('active', type === 'admin');
   btnDesoc.classList.toggle('active', type === 'desoc');
   btnSP.classList.toggle('active',    type === 'sp');
+  btnCobro.classList.toggle('active', type === 'cobro');
   document.getElementById('pillAdmin').style.display = type === 'admin' ? '' : 'none';
   document.getElementById('pillDesoc').style.display = type === 'desoc' ? '' : 'none';
   document.getElementById('pillSP').style.display    = type === 'sp'    ? '' : 'none';
+  document.getElementById('pillCobro').style.display = type === 'cobro' ? '' : 'none';
 
   /* Tema de color del dashboard */
   const dash = document.getElementById('dashboardSection');
   if (dash) {
     dash.classList.toggle('dash-mode-desoc', type === 'desoc');
     dash.classList.toggle('dash-mode-sp',    type === 'sp');
+    dash.classList.toggle('dash-mode-cobro', type === 'cobro');
   }
 
   /* Animar la tarjeta recién activada */
-  const newCard = type === 'desoc' ? btnDesoc : type === 'sp' ? btnSP : btnAdmin;
+  const newCard = type === 'desoc' ? btnDesoc : type === 'sp' ? btnSP : type === 'cobro' ? btnCobro : btnAdmin;
   newCard.classList.remove('just-activated');
   void newCard.offsetWidth;
   newCard.classList.add('just-activated');
@@ -1455,6 +1477,9 @@ function switchModule(type) {
   } else if (type === 'sp') {
     document.getElementById('dlInfoCols').textContent = '15 columnas predefinidas';
     document.getElementById('dlInfoFile').textContent = 'Formato_Servicios_Publicos_Arenas.xlsx';
+  } else if (type === 'cobro') {
+    document.getElementById('dlInfoCols').textContent = '6 columnas predefinidas';
+    document.getElementById('dlInfoFile').textContent = 'Formato_Cobro_Canones_Arenas.xlsx';
   } else {
     document.getElementById('dlInfoCols').textContent = '14 columnas predefinidas';
     document.getElementById('dlInfoFile').textContent = 'Formato_Cartas_Arenas_Inmobiliaria.xlsx';
@@ -1467,6 +1492,8 @@ function switchModule(type) {
       head.innerHTML = '<th>#</th><th>Cliente</th><th>Dirección</th><th>Inmueble</th><th>Ciudad</th><th>Deuda</th><th>Fecha límite</th><th>Acción</th>';
     } else if (type === 'sp') {
       head.innerHTML = '<th>#</th><th>Cliente</th><th>Cédula</th><th>Inmueble</th><th>Ciudad</th><th>Total SP</th><th>Acción</th>';
+    } else if (type === 'cobro') {
+      head.innerHTML = '<th>#</th><th>Cliente</th><th>Inmueble</th><th>Meses adeudados</th><th>Valor</th><th>Acción</th>';
     } else {
       head.innerHTML = '<th>#</th><th>Cliente</th><th>Dirección</th><th>Conjunto</th><th>Apto</th><th>Valor admón.</th><th>Retroactivo</th><th>Acción</th>';
     }
@@ -1477,7 +1504,8 @@ function switchModule(type) {
   const msgs = {
     admin: 'Módulo: Cartas de Administración activado.',
     desoc: 'Módulo: Cartas de Desocupación activado.',
-    sp:    'Módulo: Requerimiento de Servicios Públicos activado.'
+    sp:    'Módulo: Requerimiento de Servicios Públicos activado.',
+    cobro: 'Módulo: Cobranza de Cánones activado.'
   };
   showToast(msgs[type] || msgs.admin, 'info');
 }
@@ -1488,6 +1516,7 @@ function animateModuleSwitch(type) {
   if (!selector) return;
   const color = type === 'desoc' ? 'rgba(217,119,6,.18)'
     : type === 'sp' ? 'rgba(5,150,105,.18)'
+    : type === 'cobro' ? 'rgba(124,58,237,.18)'
     : 'rgba(43,109,232,.18)';
   const el = document.createElement('div');
   el.style.cssText = [
@@ -1596,6 +1625,30 @@ function applyModuleCardArt() {
     <line x1="36" y1="115" x2="44" y2="115" stroke="rgba(255,255,255,.22)" stroke-width="1.5"/>
   </svg>`;
 
+  /* Moneda / cobranza — violeta tenue (inactivo) */
+  const cobroLight = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 140">
+    <circle cx="112" cy="70" r="46" fill="rgba(124,58,237,.04)" stroke="rgba(124,58,237,.1)" stroke-width="1.5"/>
+    <circle cx="112" cy="70" r="34" fill="rgba(124,58,237,.03)" stroke="rgba(124,58,237,.08)" stroke-width="1.2"/>
+    <line x1="112" y1="42" x2="112" y2="98" stroke="rgba(124,58,237,.16)" stroke-width="2.5"/>
+    <path d="M124,54 H105 a10,10 0 0 0 0,20 h14 a10,10 0 0 1 0,20 H98" fill="none" stroke="rgba(124,58,237,.16)" stroke-width="2.5" stroke-linecap="round"/>
+    <rect x="16" y="34" width="46" height="60" rx="4" fill="rgba(124,58,237,.04)" stroke="rgba(124,58,237,.09)" stroke-width="1.2"/>
+    <line x1="26" y1="50" x2="52" y2="50" stroke="rgba(124,58,237,.1)" stroke-width="1.2"/>
+    <line x1="26" y1="62" x2="52" y2="62" stroke="rgba(124,58,237,.08)" stroke-width="1.2"/>
+    <line x1="26" y1="74" x2="42" y2="74" stroke="rgba(124,58,237,.07)" stroke-width="1.2"/>
+  </svg>`;
+
+  /* Moneda / cobranza — blanco (activo sobre violeta) */
+  const cobroDark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 140">
+    <circle cx="112" cy="70" r="46" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)" stroke-width="1.5"/>
+    <circle cx="112" cy="70" r="34" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.11)" stroke-width="1.2"/>
+    <line x1="112" y1="42" x2="112" y2="98" stroke="rgba(255,255,255,.28)" stroke-width="2.5"/>
+    <path d="M124,54 H105 a10,10 0 0 0 0,20 h14 a10,10 0 0 1 0,20 H98" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="2.5" stroke-linecap="round"/>
+    <rect x="16" y="34" width="46" height="60" rx="4" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.13)" stroke-width="1.2"/>
+    <line x1="26" y1="50" x2="52" y2="50" stroke="rgba(255,255,255,.16)" stroke-width="1.2"/>
+    <line x1="26" y1="62" x2="52" y2="62" stroke="rgba(255,255,255,.13)" stroke-width="1.2"/>
+    <line x1="26" y1="74" x2="42" y2="74" stroke="rgba(255,255,255,.11)" stroke-width="1.2"/>
+  </svg>`;
+
   function uri(svg) {
     return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
   }
@@ -1609,6 +1662,8 @@ function applyModuleCardArt() {
     .module-card.desoc-card::after  { background-image: ${uri(desocDark)}; }
     .module-card.sp-card::before    { background-image: ${uri(spLight)}; }
     .module-card.sp-card::after     { background-image: ${uri(spDark)}; }
+    .module-card.cobro-card::before { background-image: ${uri(cobroLight)}; }
+    .module-card.cobro-card::after  { background-image: ${uri(cobroDark)}; }
   `;
   document.head.appendChild(style);
 }
@@ -2690,6 +2745,440 @@ function buildSPPageInDoc(doc, client) {
   doc.text('GRUPO ARENAS S.A.S.', ML, y); y += LS;
   doc.setFont('helvetica','normal');
   doc.text('Área de Cartera y Cobranza', ML, y);
+}
+
+/* ══════════════════════════════════════════════════════════
+   MÓDULO: COBRANZA DE CÁNONES DE ARRENDAMIENTO
+══════════════════════════════════════════════════════════ */
+
+/* La fecha se digita sola ("19 de mayo de 2026"); si ya trae la ciudad no se repite. */
+function cobroFecha(c) {
+  const f = v(c.fecha_carta);
+  return /^barranquilla/i.test(f) ? f : `Barranquilla, ${f}`;
+}
+
+/* El "$" va fuera del dato, como en el formato base. */
+function cobroValor(c) {
+  const s = v(c.valor_adeudado);
+  return s.startsWith('$') ? s : `$${s}`;
+}
+
+/* ── Descarga del formato Excel de cobranza ── */
+function downloadTemplateCobro() {
+  const example = [
+    '19 de mayo de 2026',
+    'GUTIERREZ NOGUERA XIMENA',
+    'CL 104 53 49 CON ZION TOWERS TO 1 AP 901',
+    'ENERO 2026 / FEBRERO 2026',
+    '$1.524.000',
+    'https://www.psepagos.co/PSEHostingUI/showTicketOffice.aspx?ID=5025'
+  ];
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([COBRO_COLS, example]);
+
+  ws['!cols'] = [{wch:24},{wch:35},{wch:45},{wch:32},{wch:18},{wch:70}];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'CobroCanones');
+  XLSX.writeFile(wb, 'Formato_Cobro_Canones_Arenas.xlsx');
+
+  showToast('Formato Excel de cobranza de cánones descargado correctamente.', 'success');
+  setStep(2);
+}
+
+/* ── Validación del Excel de cobranza ── */
+function validateDataCobro(raw, fileName) {
+  if (!raw || raw.length === 0) {
+    return { ok: false, message: 'No se encontraron registros en el archivo cargado.' };
+  }
+
+  const headers = Object.keys(raw[0]).map(h => h.trim().toLowerCase().replace(/\s+/g,'_'));
+  const missing = COBRO_COLS.filter(c => !headers.includes(c));
+
+  if (missing.length > 0) {
+    return { ok: false, message: 'Faltan las siguientes columnas obligatorias:', list: missing };
+  }
+
+  const clients = raw.map((row, i) => {
+    const normalized = {};
+    Object.keys(row).forEach(k => {
+      normalized[k.trim().toLowerCase().replace(/\s+/g,'_')] = String(row[k] ?? '').trim();
+    });
+    normalized._index = i;
+    return normalized;
+  });
+
+  const valid = clients.filter(c => c.nombre_cliente && c.nombre_cliente.length > 0);
+
+  if (valid.length === 0) {
+    return { ok: false, message: 'No se encontraron registros con nombre_cliente diligenciado.' };
+  }
+
+  return { ok: true, clients: valid };
+}
+
+/* ── Tabla de clientes de cobranza ── */
+function renderClientsCobro(list) {
+  const tbody = document.getElementById('clientTableBody');
+  const cardsWrap = document.getElementById('clientCards');
+
+  tbody.innerHTML = '';
+  cardsWrap.innerHTML = '';
+
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="table-empty">No se encontraron registros con ese criterio.</td></tr>`;
+    cardsWrap.innerHTML = `<p class="table-empty">No se encontraron registros.</p>`;
+    return;
+  }
+
+  list.forEach((c) => {
+    const isSelected = APP.selectedIndex === c._index;
+
+    const tr = document.createElement('tr');
+    tr.dataset.idx = c._index;
+    if (isSelected) tr.classList.add('selected');
+    tr.innerHTML = `
+      <td>${c._index + 1}</td>
+      <td><strong>${esc(c.nombre_cliente)}</strong></td>
+      <td>${esc(c.direccion_inmueble)}</td>
+      <td>${esc(c.meses_adeudados)}</td>
+      <td>${esc(cobroValor(c))}</td>
+      <td>
+        <button class="btn-select-client${isSelected ? ' selected-btn' : ''}" data-idx="${c._index}">
+          ${isSelected ? '✓ Seleccionado' : 'Ver carta'}
+        </button>
+      </td>`;
+    tr.querySelector('.btn-select-client').addEventListener('click', () => selectClient(c));
+    tbody.appendChild(tr);
+
+    const div = document.createElement('div');
+    div.className = `client-card${isSelected ? ' selected' : ''}`;
+    div.dataset.idx = c._index;
+    div.innerHTML = `
+      <div class="client-card-name">${esc(c.nombre_cliente)}</div>
+      <div class="client-card-row"><span>Inmueble</span><span>${esc(c.direccion_inmueble)}</span></div>
+      <div class="client-card-row"><span>Meses</span><span>${esc(c.meses_adeudados)}</span></div>
+      <div class="client-card-row"><span>Valor</span><span>${esc(cobroValor(c))}</span></div>
+      <div class="client-card-actions">
+        <button class="btn-select-client${isSelected ? ' selected-btn' : ''}" style="width:100%;justify-content:center;" data-idx="${c._index}">
+          ${isSelected ? '✓ Seleccionado' : 'Ver carta'}
+        </button>
+      </div>`;
+    div.querySelector('.btn-select-client').addEventListener('click', () => selectClient(c));
+    cardsWrap.appendChild(div);
+  });
+
+  document.getElementById('cardClients').style.display = 'block';
+  document.getElementById('cardPreview').style.display = 'block';
+}
+
+/* ── Previsualización de cobranza ── */
+function renderLetterPreviewCobro(c) {
+  const PAGE = 'position:relative;width:100%;padding-top:129.4%;overflow:hidden;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.15);';
+  const IMG  = 'position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;';
+  const TEXT = 'position:absolute;top:14.7%;left:11.6%;right:12%;font-family:Arial,Helvetica,sans-serif;font-size:1.8cqw;color:#000;line-height:1.55;';
+
+  const html = `<div style="${PAGE}">
+    <img src="assets/membrete_preview.png" style="${IMG}" alt="Membrete">
+    <div style="${TEXT}">
+      <p style="margin:0 0 1.55em 0;font-weight:700">${esc(cobroFecha(c))}</p>
+
+      <p style="margin:0">Señor(a)(es)</p>
+      <p style="margin:0;font-weight:700">${esc(v(c.nombre_cliente).toUpperCase())}</p>
+      <p style="margin:0;font-weight:700">${esc(c.direccion_inmueble)}</p>
+      <p style="margin:0 0 1.55em 0;font-weight:700">Barranquilla</p>
+
+      <p style="margin:0 0 1.55em 0;font-weight:700">Asunto: Cobro canon(es) de arrendamiento</p>
+
+      <p style="margin:0 0 1.55em 0">Cordial saludo,</p>
+
+      <p style="margin:0 0 1.55em 0;text-align:justify">
+        De acuerdo con la información registrada en nuestro sistema de cartera, a la fecha se encuentra pendiente el pago del(los)
+        <strong>canon(es) de arrendamiento correspondiente(s) al(los) mes(es) de ${esc(c.meses_adeudados)}</strong>, por valor de <strong>${esc(cobroValor(c))}</strong>.
+      </p>
+
+      <p style="margin:0 0 1.55em 0;text-align:justify">
+        Por tal motivo, solicitamos realizar el pago de la obligación pendiente a la mayor brevedad, con el fin de mantener su cuenta al día y evitar la generación de <strong>sanciones moratorias</strong> y demás gestiones de cobro a que haya lugar.
+      </p>
+
+      <p style="margin:0;font-weight:700;font-size:.9em">PUEDE CANCELAR POR MEDIO DE ESTE LINK:</p>
+      <p style="margin:0 0 1.55em 0;word-break:break-all;font-size:.9em">
+        <a href="${esc(c.link_pago)}" target="_blank" rel="noopener" style="color:#000">${esc(c.link_pago)}</a>
+      </p>
+
+      <p style="margin:0 0 3.1em 0">Agradecemos realizar el pago y remitir el respectivo comprobante de pago.</p>
+
+      <p style="margin:0 0 3.1em 0">Cordialmente,</p>
+      <p style="margin:0;font-weight:700">Dpto. de Cartera</p>
+    </div>
+  </div>`;
+
+  const sheet = document.getElementById('letterSheet');
+  sheet.style.opacity = '0';
+  sheet.style.transform = 'translateY(10px)';
+  sheet.style.padding = '0';
+  sheet.style.background = 'none';
+  sheet.innerHTML = html;
+  requestAnimationFrame(() => {
+    sheet.style.transition = 'opacity .35s ease, transform .35s ease';
+    sheet.style.opacity = '1';
+    sheet.style.transform = 'translateY(0)';
+  });
+}
+
+/* ── PDF de cobranza con membrete ── */
+async function buildPDFCobroWithTemplate(client) {
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const MM = 2.835;
+  const ML = 25 * MM;
+  const CW = 165 * MM;
+  const SZ = 11;
+  const LS = 6 * MM;
+
+  const templateDoc = await PDFDocument.load(APP.membreteBytes, { ignoreEncryption: true });
+  const { width: PW, height: PH } = templateDoc.getPage(0).getSize();
+
+  const pdfDoc = await PDFDocument.create();
+  const [embMem] = await pdfDoc.embedPdf(templateDoc, [0]);
+  const page = pdfDoc.addPage([PW, PH]);
+  page.drawPage(embMem, { x: 0, y: 0, width: PW, height: PH });
+
+  const fN = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fB = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const cMain = rgb(0, 0, 0);
+
+  let y = PH - 41 * MM;
+
+  const line = (text, font, size = SZ) => {
+    page.drawText(pdfSafe(text), { x: ML, y, size, font, color: cMain });
+    y -= LS;
+  };
+
+  /* ── Fecha y destinatario ── */
+  line(cobroFecha(client), fB);
+  y -= LS;
+  line('Señor(a)(es)', fN);
+  line(v(client.nombre_cliente).toUpperCase(), fB);
+  libWrap(pdfSafe(client.direccion_inmueble), CW, fB, SZ).forEach(l => line(l, fB));
+  line('Barranquilla', fB);
+  y -= LS;
+
+  /* ── Asunto y saludo ── */
+  line('Asunto: Cobro canon(es) de arrendamiento', fB);
+  y -= LS;
+  line('Cordial saludo,', fN);
+  y -= LS;
+
+  /* ── Cuerpo ── */
+  y = libDrawMixed(page, [
+    { t: 'De acuerdo con la información registrada en nuestro sistema de cartera, a la fecha se encuentra pendiente el pago del(los) ' },
+    /* libDrawMixed separa cada palabra con un espacio: la puntuación va pegada a su palabra */
+    { t: 'canon(es) de arrendamiento correspondiente(s) al(los) mes(es) de ' + pdfSafe(client.meses_adeudados) + ',', b: 1 },
+    { t: ' por valor de ' },
+    { t: cobroValor(client) + '.', b: 1 }
+  ], ML, y, CW, LS, SZ, fN, fB, cMain, cMain) - LS;
+
+  y = libDrawMixed(page, [
+    { t: 'Por tal motivo, solicitamos realizar el pago de la obligación pendiente a la mayor brevedad, con el fin de mantener su cuenta al día y evitar la generación de ' },
+    { t: 'sanciones moratorias', b: 1 },
+    { t: ' y demás gestiones de cobro a que haya lugar.' }
+  ], ML, y, CW, LS, SZ, fN, fB, cMain, cMain) - LS;
+
+  /* ── Link de pago ── */
+  line('PUEDE CANCELAR POR MEDIO DE ESTE LINK:', fB, 10);
+  libWrap(v(client.link_pago), CW, fN, 10).forEach(l => line(l, fN, 10));
+  y -= LS;
+
+  line('Agradecemos realizar el pago y remitir el respectivo comprobante de pago.', fN);
+  y -= 2 * LS;
+
+  /* ── Cierre ── */
+  line('Cordialmente,', fN);
+  y -= 2 * LS;
+  line('Dpto. de Cartera', fB);
+
+  return pdfDoc.save();
+}
+
+/* ── Nombre PDF de cobranza ── */
+function pdfNameCobro(client) {
+  const nm = v(client.nombre_cliente).replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'').substring(0,40);
+  return `Cobro_Canon_${nm}.pdf`;
+}
+
+/* ── PDF individual de cobranza ── */
+async function generatePDFSingleCobro() {
+  if (!APP.selectedClient) {
+    showToast('Seleccione un destinatario para generar el PDF.', 'warning');
+    return;
+  }
+  showLoading('Generando PDF con membrete...');
+  await delay(50);
+  try {
+    if (APP.membreteBytes) {
+      const bytes = await buildPDFCobroWithTemplate(APP.selectedClient);
+      saveAs(new Blob([bytes], { type: 'application/pdf' }), pdfNameCobro(APP.selectedClient));
+    } else {
+      buildPDFCobroFallback(APP.selectedClient).save(pdfNameCobro(APP.selectedClient));
+    }
+    setStep(6);
+    showToast('PDF de cobranza generado correctamente.', 'success');
+  } catch (err) {
+    showToast('Error al generar el PDF: ' + err.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+/* ── PDF consolidado de cobranza ── */
+async function generatePDFConsolidatedCobro() {
+  if (APP.clients.length === 0) {
+    showToast('No hay destinatarios cargados.', 'warning');
+    return;
+  }
+  showLoading(`Generando PDF consolidado (${APP.clients.length} cartas)...`);
+  await delay(50);
+  try {
+    if (APP.membreteBytes) {
+      const { PDFDocument } = PDFLib;
+      const merged = await PDFDocument.create();
+      for (let i = 0; i < APP.clients.length; i++) {
+        document.getElementById('loadingMsg').textContent =
+          `Procesando carta ${i + 1} de ${APP.clients.length}...`;
+        await delay(5);
+        const bytes  = await buildPDFCobroWithTemplate(APP.clients[i]);
+        const single = await PDFDocument.load(bytes);
+        const [emb]  = await merged.embedPdf(single, [0]);
+        const { width: pw, height: ph } = single.getPage(0).getSize();
+        const pg = merged.addPage([pw, ph]);
+        pg.drawPage(emb, { x: 0, y: 0, width: pw, height: ph });
+      }
+      const out = await merged.save();
+      saveAs(new Blob([out], { type: 'application/pdf' }),
+        'Cartas_Cobro_Canones_Arenas_Inmobiliaria.pdf');
+    } else {
+      let doc = null;
+      for (let i = 0; i < APP.clients.length; i++) {
+        if (!doc) { doc = buildPDFCobroFallback(APP.clients[i]); }
+        else { doc.addPage('letter','portrait'); buildCobroPageInDoc(doc, APP.clients[i]); }
+      }
+      doc.save('Cartas_Cobro_Canones_Arenas_Inmobiliaria.pdf');
+    }
+    setStep(6);
+    showToast(`PDF consolidado de cobranza generado con ${APP.clients.length} carta(s).`, 'success');
+  } catch (err) {
+    showToast('Error al generar el PDF consolidado: ' + err.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+/* ── ZIP de cobranza ── */
+async function generatePDFZipCobro() {
+  if (APP.clients.length === 0) {
+    showToast('No hay destinatarios cargados.', 'warning');
+    return;
+  }
+  showLoading(`Generando ${APP.clients.length} PDF de cobranza...`);
+  await delay(80);
+  try {
+    const zip    = new JSZip();
+    const folder = zip.folder('Cartas_Cobro_Canones_Arenas');
+    for (let i = 0; i < APP.clients.length; i++) {
+      const c = APP.clients[i];
+      document.getElementById('loadingMsg').textContent =
+        `Generando PDF ${i + 1} de ${APP.clients.length}...`;
+      await delay(10);
+      let bytes;
+      if (APP.membreteBytes) {
+        bytes = await buildPDFCobroWithTemplate(c);
+      } else {
+        bytes = buildPDFCobroFallback(c).output('arraybuffer');
+      }
+      folder.file(pdfNameCobro(c), bytes);
+    }
+    document.getElementById('loadingMsg').textContent = 'Comprimiendo archivos...';
+    await delay(30);
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    saveAs(blob, 'Cartas_Cobro_Canones_Arenas_Inmobiliaria.zip');
+    setStep(6);
+    showToast(`ZIP de cobranza generado con ${APP.clients.length} PDF.`, 'success');
+  } catch (err) {
+    showToast('Error al generar el ZIP: ' + err.message, 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+/* ── Fallback jsPDF de cobranza (sin membrete) ── */
+function buildPDFCobroFallback(client) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+  buildCobroPageInDoc(doc, client);
+  return doc;
+}
+
+function buildCobroPageInDoc(doc, client) {
+  const PW = 215.9, ML = 22, MR = 22;
+  const CW = PW - ML - MR;
+  const LS = 5.8;
+  let y = 18;
+
+  if (APP.logoDataUrl) {
+    try {
+      const lW = 75, lA = APP.logoAspect || 0.28;
+      const lH = Math.min(lW * lA, 28);
+      doc.addImage(APP.logoDataUrl, 'PNG', ML, y, lW, lH, undefined, 'FAST');
+      y += lH + 4;
+    } catch (_) { y += 5; }
+  } else {
+    doc.setFontSize(16); doc.setFont('helvetica','bold'); doc.setTextColor(124,58,237);
+    doc.text('ARENAS INMOBILIARIA', ML, y + 8); y += 14;
+  }
+  doc.setDrawColor(226,232,240); doc.setLineWidth(0.3);
+  doc.line(ML, y, PW - MR, y); y += 8;
+
+  doc.setFontSize(10.5); doc.setFont('helvetica','normal'); doc.setTextColor(30,41,59);
+
+  const text = (str, bold) => {
+    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.text(pdfSafe(str), ML, y);
+  };
+
+  text(cobroFecha(client), true);                          y += LS * 2;
+  text('Señor(a)(es)');                                    y += LS;
+  text(v(client.nombre_cliente).toUpperCase(), true);      y += LS;
+  const dirL = doc.splitTextToSize(pdfSafe(client.direccion_inmueble), CW);
+  doc.setFont('helvetica','bold');
+  doc.text(dirL, ML, y);                                   y += dirL.length * LS;
+  text('Barranquilla', true);                              y += LS * 2;
+  text('Asunto: Cobro canon(es) de arrendamiento', true);  y += LS * 2;
+  text('Cordial saludo,');                                 y += LS * 2;
+
+  y = renderMixedParagraph(doc, [
+    { text: 'De acuerdo con la información registrada en nuestro sistema de cartera, a la fecha se encuentra pendiente el pago del(los) ' },
+    { text: 'canon(es) de arrendamiento correspondiente(s) al(los) mes(es) de ' + pdfSafe(client.meses_adeudados), bold: true },
+    { text: ', por valor de ' },
+    { text: cobroValor(client), bold: true },
+    { text: '.' }
+  ], ML, y, CW, LS, doc) + LS;
+
+  y = renderMixedParagraph(doc, [
+    { text: 'Por tal motivo, solicitamos realizar el pago de la obligación pendiente a la mayor brevedad, con el fin de mantener su cuenta al día y evitar la generación de ' },
+    { text: 'sanciones moratorias', bold: true },
+    { text: ' y demás gestiones de cobro a que haya lugar.' }
+  ], ML, y, CW, LS, doc) + LS;
+
+  doc.setFontSize(10);
+  text('PUEDE CANCELAR POR MEDIO DE ESTE LINK:', true);    y += LS;
+  doc.setFont('helvetica','normal');
+  const lkL = doc.splitTextToSize(v(client.link_pago), CW);
+  doc.text(lkL, ML, y);                                    y += lkL.length * LS + LS;
+
+  doc.setFontSize(10.5);
+  text('Agradecemos realizar el pago y remitir el respectivo comprobante de pago.'); y += LS * 3;
+  text('Cordialmente,');                                   y += LS * 3;
+  text('Dpto. de Cartera', true);
 }
 
 /* ══════════════════════════════════════════════════════════
